@@ -29,18 +29,18 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize Expo project with TypeScript template using `npx create-expo-app c1-task-manager --template expo-template-blank-typescript`
-- [ ] T002 Install core dependencies: `npx expo install expo-router react-native-reanimated`
-- [ ] T003 [P] Install Firebase SDK: `npx expo install firebase @react-native-async-storage/async-storage`
-- [ ] T004 [P] Install networking and notifications: `npx expo install expo-notifications @react-native-community/netinfo`
-- [ ] T005 [P] Install web dependencies: `npx expo install react-native-web react-dom @expo/metro-runtime`
-- [ ] T006 Configure TypeScript with strict mode in `tsconfig.json`
-- [ ] T007 [P] Configure Expo Router by creating `app/_layout.tsx` with root layout
-- [ ] T008 [P] Create project directory structure: `app/`, `components/`, `services/`, `contexts/`, `reducers/`, `types/`, `constants/`, `utils/`, `assets/`
-- [ ] T009 [P] Configure `app.json` for web, iOS, and Android platforms with proper app name and icons
-- [ ] T010 [P] Setup Firebase project and create `firebaseConfig.ts` in project root
-- [ ] T011 [P] Create Firestore security rules in `firestore.rules` (allow all read/write for anonymous access)
-- [ ] T012 [P] Configure Metro bundler for web builds in `metro.config.js`
+- [X] T001 Initialize Expo project with TypeScript template using `npx create-expo-app c1-task-manager --template expo-template-blank-typescript`
+- [X] T002 Install core dependencies: `npx expo install expo-router react-native-reanimated`
+- [X] T003 [P] Install Firebase SDK: `npx expo install firebase @react-native-async-storage/async-storage`
+- [X] T004 [P] Install networking and notifications: `npx expo install expo-notifications @react-native-community/netinfo`
+- [X] T005 [P] Install web dependencies: `npx expo install react-native-web react-dom @expo/metro-runtime`
+- [X] T006 Configure TypeScript with strict mode in `tsconfig.json`
+- [X] T007 [P] Configure Expo Router by creating `app/_layout.tsx` with root layout
+- [X] T008 [P] Create project directory structure: `app/`, `components/`, `services/`, `contexts/`, `reducers/`, `types/`, `constants/`, `utils/`, `assets/`
+- [X] T009 [P] Configure `app.json` for web, iOS, and Android platforms with proper app name and icons
+- [X] T010 [P] Setup Firebase project and create `firebaseConfig.ts` in project root
+- [X] T011 [P] Create Firestore security rules in `firestore.rules` (allow all read/write for anonymous access)
+- [X] T012 [P] Configure Metro bundler for web builds in `metro.config.js`
 
 ---
 

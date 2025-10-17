@@ -6,9 +6,17 @@ node_modules/
 
 # Expo
 .expo/
+.expo-shared/
 dist/
 web-build/
 expo-env.d.ts
+
+# build artifacts
+build/
+coverage/
+
+# logs
+*.log
 
 # Native
 .kotlin/
