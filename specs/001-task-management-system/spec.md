@@ -5,6 +5,16 @@
 **Status**: Draft
 **Input**: User description: "Task management system with add, complete, delete functionality, Firestore storage, web deployment on GitHub Pages with CI/CD, and enhanced features including animations, detailed task view, notifications, and theme toggling"
 
+## Clarifications
+
+### Session 2025-10-17
+
+- Q: Should the MVP require user authentication, or should tasks be anonymous/public for the initial version? → A: Anonymous/Public tasks - no authentication required, tasks stored without user association (MVP approach)
+- Q: Should task deletion require user confirmation, or happen immediately? → A: Require confirmation - show a confirmation dialog before deleting any task
+- Q: How should the app behave when Firestore is offline or unreachable? → A: Queue changes, retry on reconnect - allow users to add/edit tasks offline, sync automatically when online
+- Q: Should there be a maximum character limit for task descriptions? → A: 500 characters - sufficient for detailed task descriptions, prevents abuse
+- Q: What should the empty state message say when no tasks exist? → A: Action-oriented - "Get started by adding your first task!" or similar encouraging message
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Basic Task Management (Priority: P1)
@@ -19,9 +29,11 @@ Users need a simple way to capture, track, and complete their daily tasks. They 
 
 1. **Given** the user opens the app, **When** they click "Add Task" and enter a task description, **Then** the new task appears in the task list
 2. **Given** a task exists in the list, **When** the user taps the task or a complete button, **Then** the task is marked as complete with visual distinction (e.g., strikethrough, checkmark, different color)
-3. **Given** a task exists in the list, **When** the user swipes the task or clicks delete, **Then** the task is removed from the list
-4. **Given** multiple tasks exist, **When** the user views the list, **Then** all tasks are displayed showing their complete/incomplete status
-5. **Given** the user adds/completes/deletes a task, **When** they close and reopen the app, **Then** their changes are persisted
+3. **Given** a task exists in the list, **When** the user swipes the task or clicks delete, **Then** a confirmation dialog appears asking "Delete this task?"
+4. **Given** the delete confirmation dialog is shown, **When** the user confirms deletion, **Then** the task is removed from the list
+5. **Given** the delete confirmation dialog is shown, **When** the user cancels, **Then** the task remains in the list
+6. **Given** multiple tasks exist, **When** the user views the list, **Then** all tasks are displayed showing their complete/incomplete status
+7. **Given** the user adds/completes/deletes a task, **When** they close and reopen the app, **Then** their changes are persisted
 
 ---
 
@@ -111,14 +123,14 @@ The app must be accessible on the web and automatically deployed when changes ar
 
 ### Edge Cases
 
-- What happens when the user tries to add a task with an empty description?
-- What happens when Firestore connection is lost or unavailable?
+- What happens when the user tries to add a task with an empty description? → System prevents creation and shows validation message (FR-007)
+- What happens when Firestore connection is lost or unavailable? → Changes are queued locally and synced automatically when connection restored (FR-009b, FR-009c)
 - What happens when the user tries to set a reminder time in the past?
-- How does the system handle tasks with very long descriptions (e.g., 1000+ characters)?
+- How does the system handle tasks with very long descriptions (e.g., 1000+ characters)? → System enforces 500 character limit and prevents exceeding it (FR-001a, FR-007a)
 - What happens when the user rapidly taps add/delete multiple times?
 - How does the app behave when switching themes during an animation?
 - What happens if push notification permissions are denied?
-- How does the web version handle offline scenarios?
+- How does the web version handle offline scenarios? → Same as mobile: queue changes and sync on reconnect (FR-009b, FR-009c)
 - What happens when the user has hundreds or thousands of tasks?
 
 ## Requirements *(mandatory)*
@@ -127,15 +139,25 @@ The app must be accessible on the web and automatically deployed when changes ar
 
 #### Core Task Management (P1)
 
-- **FR-001**: System MUST allow users to create new tasks with a text description
+- **FR-001**: System MUST allow users to create new tasks with a text description without requiring authentication
+- **FR-001a**: System MUST limit task descriptions to a maximum of 500 characters
+- **FR-001b**: System MUST display character count and remaining characters while user types task description
 - **FR-002**: System MUST display all tasks in a scrollable list view
 - **FR-003**: System MUST allow users to mark tasks as complete or incomplete
 - **FR-004**: System MUST visually distinguish completed tasks from incomplete tasks (e.g., strikethrough, checkmark, opacity)
 - **FR-005**: System MUST allow users to delete tasks from the list
+- **FR-005a**: System MUST show a confirmation dialog before deleting any task to prevent accidental data loss
+- **FR-005b**: System MUST provide both "Confirm" and "Cancel" options in the deletion confirmation dialog
 - **FR-006**: System MUST persist all task data using Firestore for cross-platform synchronization
 - **FR-007**: System MUST prevent creation of tasks with empty descriptions
+- **FR-007a**: System MUST prevent creation of tasks exceeding 500 character limit
+- **FR-007b**: System MUST show validation error message when user attempts to exceed character limit
 - **FR-008**: System MUST load existing tasks when the app launches
 - **FR-009**: System MUST sync task changes across all platforms (web and mobile) in near real-time
+- **FR-009a**: System MUST store tasks anonymously without user authentication for MVP
+- **FR-009b**: System MUST queue task changes locally when Firestore is offline or unreachable
+- **FR-009c**: System MUST automatically sync queued changes when connection is restored
+- **FR-009d**: System MUST allow users to create, edit, and delete tasks while offline with changes persisted locally
 
 #### Detailed Task View (P2)
 
@@ -151,7 +173,10 @@ The app must be accessible on the web and automatically deployed when changes ar
 - **FR-016**: System MUST use a clean, intuitive UI layout with consistent spacing and typography
 - **FR-017**: System MUST be responsive and work correctly on various screen sizes (mobile phones, tablets, desktop web)
 - **FR-018**: System MUST provide empty state messaging when no tasks exist
+- **FR-018a**: Empty state message MUST be action-oriented and encouraging (e.g., "Get started by adding your first task!")
 - **FR-019**: System MUST show loading indicators during data fetch operations
+- **FR-019a**: System MUST display connection status indicator when offline
+- **FR-019b**: System MUST show visual feedback when changes are queued for sync (e.g., pending sync indicator)
 
 #### Theme Support (P3)
 
@@ -185,13 +210,13 @@ The app must be accessible on the web and automatically deployed when changes ar
 
 - **Task**: Represents a user's to-do item with attributes including:
   - Unique identifier
-  - Description (text content)
+  - Description (text content, maximum 500 characters)
   - Completion status (complete/incomplete)
   - Creation timestamp
   - Completion timestamp (when marked complete)
   - Due date (optional, for reminders)
   - Reminder time (optional)
-  - User association (for multi-user support in future)
+  - Device/session identifier (for anonymous multi-device sync in MVP, no user authentication required)
 
 - **User Preferences**: Stores user-specific settings including:
   - Theme preference (dark/light/system)
@@ -217,14 +242,14 @@ The app must be accessible on the web and automatically deployed when changes ar
 
 ## Assumptions
 
-- Users have an internet connection for initial app load and data synchronization
 - Firestore is configured and accessible from the app
+- Firestore offline persistence is enabled for seamless offline/online transitions
 - GitHub Pages is set up for the repository
 - Users grant necessary permissions for notifications (P3 feature)
 - EAS build services are configured for mobile releases
 - Users are familiar with basic task management concepts
 - Web users are using modern browsers with JavaScript enabled
-- Standard authentication/authorization will be handled (or tasks are public/anonymous for MVP)
+- No user authentication required for MVP - tasks are stored anonymously and accessible from any device with the app
 
 ## Dependencies
 
