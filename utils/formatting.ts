@@ -1,4 +1,6 @@
 const DEFAULT_LOCALE = typeof Intl !== 'undefined' ? undefined : 'en-US';
+const HAS_RELATIVE_TIME_FORMAT =
+  typeof Intl !== 'undefined' && typeof Intl.RelativeTimeFormat === 'function';
 
 const getIntlDateTimeFormatter = (options: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat(DEFAULT_LOCALE, options);
@@ -51,6 +53,23 @@ export const formatRelativeTime = (value: Date | string | number): string => {
 
   if (Math.abs(diffMinutes) < 1) {
     return 'Just now';
+  }
+
+  if (!HAS_RELATIVE_TIME_FORMAT) {
+    if (Math.abs(diffMinutes) < 60) {
+      const suffix = diffMinutes > 0 ? 'ago' : 'from now';
+      return `${Math.abs(diffMinutes)} min ${suffix}`;
+    }
+
+    const diffHours = Math.round(diffMinutes / 60);
+    if (Math.abs(diffHours) < 24) {
+      const suffix = diffHours > 0 ? 'ago' : 'from now';
+      return `${Math.abs(diffHours)} hr ${suffix}`;
+    }
+
+    const diffDays = Math.round(diffHours / 24);
+    const suffix = diffDays > 0 ? 'ago' : 'from now';
+    return `${Math.abs(diffDays)} day ${suffix}`;
   }
 
   const rtf = new Intl.RelativeTimeFormat(DEFAULT_LOCALE, { numeric: 'auto' });
