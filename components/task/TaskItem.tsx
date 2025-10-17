@@ -62,7 +62,7 @@ export const TaskItem = ({ task, onToggle, onDelete, onPress }: TaskItemProps) =
             opacity: task.completed ? 0.65 : 1,
           },
         ]}
-  onPress={handlePress}
+        onPress={handlePress}
         testID={`task-item-${task.id}`}>
         <Pressable
           onPress={handleToggle}

@@ -36,7 +36,8 @@ export const TaskList = ({
 
   return (
     <ScrollView
-      contentContainerStyle={[styles.contentContainer, { backgroundColor: palette.surface }]}
+      style={[styles.scrollView, { backgroundColor: palette.surface }]}
+      contentContainerStyle={styles.contentContainer}
       refreshControl={
         onRefresh ? (
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.primary} />
@@ -56,12 +57,15 @@ export const TaskList = ({
       </View>
 
       {loading ? <LoadingIndicator /> : null}
-  {shouldShowEmptyState ? ListEmptyComponent : null}
+      {shouldShowEmptyState ? ListEmptyComponent : null}
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+  },
   contentContainer: {
     flexGrow: 1,
     padding: 16,

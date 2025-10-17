@@ -34,21 +34,22 @@ export const ConfirmDialog = ({
       onRequestClose={onCancel}
       statusBarTranslucent
       supportedOrientations={['portrait', 'portrait-upside-down', 'landscape']}>
-      <TouchableWithoutFeedback onPress={onCancel}>
-        <View style={styles.backdrop} accessibilityRole="button" accessibilityLabel="Dismiss dialog">
-          <TouchableWithoutFeedback>
-            <View style={[styles.card, { backgroundColor: palette.surfaceElevated }]}
+      <TouchableWithoutFeedback onPress={onCancel} accessibilityRole="button" accessibilityLabel="Dismiss dialog">
+        <View style={styles.backdrop}>
+          <TouchableWithoutFeedback onPress={() => undefined} accessible={false}>
+            <View
+              style={[styles.card, { backgroundColor: palette.surfaceElevated }]}
               accessibilityViewIsModal
               accessibilityLiveRegion="polite">
-          <Text style={[styles.title, { color: palette.text }]}>{title}</Text>
-          <Text style={[styles.message, { color: palette.textMuted }]}>{message}</Text>
-          <View style={styles.actions}>
-            <Button
-              label={cancelLabel}
-              variant="ghost"
-              onPress={onCancel}
-              accessibilityLabel={`${cancelLabel} deletion`}
-            />
+              <Text style={[styles.title, { color: palette.text }]}>{title}</Text>
+              <Text style={[styles.message, { color: palette.textMuted }]}>{message}</Text>
+              <View style={styles.actions}>
+                <Button
+                  label={cancelLabel}
+                  variant="ghost"
+                  onPress={onCancel}
+                  accessibilityLabel={`${cancelLabel} deletion`}
+                />
                 <Button
                   label={confirmLabel}
                   variant="primary"
@@ -56,7 +57,7 @@ export const ConfirmDialog = ({
                   accessibilityLabel={`${confirmLabel} task`}
                   style={{ backgroundColor: palette.danger }}
                 />
-          </View>
+              </View>
             </View>
           </TouchableWithoutFeedback>
         </View>

@@ -16,8 +16,12 @@ export const EmptyState = ({ title, description, action }: EmptyStateProps) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.emojiContainer}>
-        <Text style={styles.emoji} accessibilityRole="text" aria-hidden>
+      <View
+        style={styles.emojiContainer}
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel="Clipboard illustration">
+        <Text style={styles.emoji} accessibilityElementsHidden>
           📋
         </Text>
       </View>

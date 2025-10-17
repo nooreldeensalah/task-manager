@@ -8,10 +8,4 @@ export const FIRESTORE_COLLECTIONS = {
 export const STORAGE_KEYS = {
   THEME_PREFERENCE: '@c1-task-manager/theme-preference',
   USER_PREFERENCES: '@c1-task-manager/preferences',
-  LAST_SYNC_TIMESTAMP: '@c1-task-manager/last-sync-timestamp',
-} as const;
-
-export const OFFLINE = {
-  SYNC_DEBOUNCE_MS: 750,
-  RETRY_INTERVAL_MS: 5_000,
 } as const;

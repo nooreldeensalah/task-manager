@@ -60,7 +60,7 @@
 - [X] T020 Implement taskService with CRUD operations in `services/taskService.ts` (createTask, updateTask, deleteTask, fetchTasks, subscribeToTasks)
 - [X] T021 [P] Create useTasks custom hook in `hooks/useTasks.ts` to access TaskContext
 - [X] T022 [P] Create useTheme custom hook in `hooks/useTheme.ts` to access ThemeContext
-- [X] T023 [P] Create useOfflineStatus hook in `hooks/useOfflineStatus.ts` using NetInfo
+- [ ] T023 [P] Create useOfflineStatus hook in `hooks/useOfflineStatus.ts` using NetInfo _(Deprecated for online-first scope)_
 - [X] T024 [P] Define app constants in `constants/Config.ts` (character limits, etc.)
 - [X] T025 [P] Define color schemes in `constants/Colors.ts` (light and dark themes)
 - [X] T026 [P] Create validation utilities in `utils/validation.ts` (validateTaskDescription, characterLimit)
@@ -72,28 +72,28 @@
 
 ## Phase 3: User Story 1 - Basic Task Management (Priority: P1) 🎯 MVP
 
-**Goal**: Deliver core task management functionality - add, complete, delete tasks with Firestore persistence and offline support
+**Goal**: Deliver core task management functionality - add, complete, delete tasks with Firestore persistence and resilient online-first handling
 
 **Independent Test**: User can add a new task, mark it complete, delete it with confirmation, and changes persist after app restart
 
 ### Implementation for User Story 1
 
-- [ ] T028 [P] [US1] Create Button component in `components/common/Button.tsx`
-- [ ] T029 [P] [US1] Create Input component in `components/common/Input.tsx`
-- [ ] T030 [P] [US1] Create LoadingIndicator component in `components/common/LoadingIndicator.tsx`
-- [ ] T031 [P] [US1] Create EmptyState component in `components/common/EmptyState.tsx` with action-oriented message
-- [ ] T032 [P] [US1] Create ConfirmDialog component in `components/common/ConfirmDialog.tsx` for delete confirmation
-- [ ] T033 [US1] Create TaskInput component in `components/task/TaskInput.tsx` with character counter (500 char limit)
-- [ ] T034 [US1] Create TaskItem component in `components/task/TaskItem.tsx` with complete/delete actions
-- [ ] T035 [US1] Create TaskList component in `components/task/TaskList.tsx` with ScrollView
-- [ ] T036 [US1] Implement main task list screen in `app/(tabs)/index.tsx` with TaskList, TaskInput, and EmptyState
-- [ ] T037 [US1] Integrate TaskContext provider in `app/_layout.tsx`
-- [ ] T038 [US1] Integrate ThemeContext provider in `app/_layout.tsx`
-- [ ] T039 [US1] Add task creation logic with validation in `app/(tabs)/index.tsx`
-- [ ] T040 [US1] Add task completion toggle logic in TaskItem component
-- [ ] T041 [US1] Add delete confirmation dialog trigger in TaskItem component
-- [ ] T042 [US1] Implement offline queue mechanism in taskService.ts for Firestore writes
-- [ ] T043 [US1] Add offline status indicator to main screen header
+- [x] T028 [P] [US1] Create Button component in `components/common/Button.tsx`
+- [x] T029 [P] [US1] Create Input component in `components/common/Input.tsx`
+- [x] T030 [P] [US1] Create LoadingIndicator component in `components/common/LoadingIndicator.tsx`
+- [x] T031 [P] [US1] Create EmptyState component in `components/common/EmptyState.tsx` with action-oriented message
+- [x] T032 [P] [US1] Create ConfirmDialog component in `components/common/ConfirmDialog.tsx` for delete confirmation
+- [x] T033 [US1] Create TaskInput component in `components/task/TaskInput.tsx` with character counter (500 char limit)
+- [x] T034 [US1] Create TaskItem component in `components/task/TaskItem.tsx` with complete/delete actions
+- [x] T035 [US1] Create TaskList component in `components/task/TaskList.tsx` with ScrollView
+- [x] T036 [US1] Implement main task list screen in `app/(tabs)/index.tsx` with TaskList, TaskInput, and EmptyState
+- [x] T037 [US1] Integrate TaskContext provider in `app/_layout.tsx`
+- [x] T038 [US1] Integrate ThemeContext provider in `app/_layout.tsx`
+- [x] T039 [US1] Add task creation logic with validation in `app/(tabs)/index.tsx`
+- [x] T040 [US1] Add task completion toggle logic in TaskItem component
+- [x] T041 [US1] Add delete confirmation dialog trigger in TaskItem component
+- [ ] T042 [US1] Implement offline queue mechanism in taskService.ts for Firestore writes _(Deferred for online-first scope)_
+- [ ] T043 [US1] Add offline status indicator to main screen header _(Deferred for online-first scope)_
 - [ ] T044 [US1] Test task persistence: create, complete, delete, restart app
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently (MVP complete!)
