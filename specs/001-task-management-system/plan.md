@@ -13,7 +13,7 @@ Build a cross-platform task management application using React Native with Expo 
 **Primary Dependencies**:
 
 - **Framework**: Expo (React Native) with web support via `react-native-web`
-- **State Management**: Zustand for global state (lightweight, TypeScript-friendly)
+- **State Management**: React Context API + useReducer for global state (built-in, no external dependencies)
 - **Database**: Firestore SDK with offline persistence enabled
 - **Navigation**: React Navigation 6.x (stack + tab navigators)
 - **UI Components**: React Native Paper or NativeBase (consistent cross-platform design system)
@@ -83,11 +83,11 @@ Build a cross-platform task management application using React Native with Expo 
 
 ### V. State Management Discipline
 
-- ✅ **PASS**: Zustand for global task state (CRUD operations, sync status)
+- ✅ **PASS**: React Context API + useReducer for global task state (CRUD operations, sync status)
 - ✅ **PASS**: Context API for theme preferences
-- ✅ **PASS**: Local component state for UI-only concerns (input focus, modal visibility)
+- ✅ **PASS**: Local component state (useState) for UI-only concerns (input focus, modal visibility)
 - ✅ **PASS**: Firestore integration isolated in service layer
-- ✅ **PASS**: Unidirectional data flow
+- ✅ **PASS**: Unidirectional data flow with reducer pattern
 
 **Result**: ✅ ALL GATES PASSED - Proceed to Phase 0
 
@@ -137,17 +137,18 @@ specs/001-task-management-system/
 │   ├── taskService.ts            # Task CRUD operations
 │   └── notificationService.ts    # Push notification handling
 │
-├── store/                        # State management
-│   ├── taskStore.ts              # Zustand store for tasks
-│   └── types.ts                  # State type definitions
+├── contexts/                     # React contexts & state management
+│   ├── TaskContext.tsx           # Task state provider (useReducer)
+│   ├── ThemeContext.tsx          # Theme provider
+│   └── types.ts                  # Context state type definitions
+│
+├── reducers/                     # State reducers
+│   └── taskReducer.ts            # Task state reducer logic
 │
 ├── hooks/                        # Custom React hooks
 │   ├── useTheme.ts               # Theme context hook
 │   ├── useTasks.ts               # Task operations hook
 │   └── useOfflineStatus.ts      # Network status monitoring
-│
-├── contexts/                     # React contexts
-│   └── ThemeContext.tsx          # Theme provider
 │
 ├── types/                        # Shared TypeScript types
 │   ├── task.ts                   # Task entity types
@@ -192,8 +193,8 @@ specs/001-task-management-system/
 - `app/` for screen-level components (routing)
 - `components/` for reusable UI components (organized by feature)
 - `services/` for business logic and external integrations
-- `store/` for state management (Zustand)
-- `hooks/` and `contexts/` for shared React patterns
+- `contexts/` and `reducers/` for state management (React Context API + useReducer)
+- `hooks/` for custom React hooks
 - `types/` for centralized type definitions
 
 This structure supports:
@@ -202,6 +203,7 @@ This structure supports:
 - Easy testing of individual components
 - Scalability for future features
 - Cross-platform code sharing
+- No external state management dependencies
 
 ## Complexity Tracking
 
@@ -250,22 +252,23 @@ This structure supports:
 - Firestore uses last-write-wins for conflict resolution
 - Consider optimistic UI updates for better UX
 
-### 3. Zustand Integration with React Native
+### 3. React Context API + useReducer Pattern
 
 **Questions to Answer**:
 
-- How to structure Zustand stores for TypeScript?
-- How to persist store state using AsyncStorage?
-- How to integrate Zustand with Firestore real-time updates?
+- How to structure Context providers and reducers for TypeScript?
+- How to persist state using AsyncStorage?
+- How to integrate Context/Reducer with Firestore real-time updates?
 - What are the performance optimization strategies?
 
 **Expected Findings**:
 
-- `create<StoreInterface>()` with typed actions and selectors
-- `persist` middleware with `AsyncStorage` adapter for state persistence
-- Subscribe to Firestore snapshots and update store in real-time
-- Use shallow equality checks and selectors to prevent unnecessary re-renders
-- Consider `immer` middleware for immutable state updates
+- Create typed `TaskContext` with `useReducer` for complex state logic
+- Use `React.memo` and `useMemo` to prevent unnecessary re-renders
+- Implement `AsyncStorage` persistence with useEffect hooks
+- Subscribe to Firestore snapshots and dispatch reducer actions in real-time
+- Split contexts by concern (TaskContext, ThemeContext) to minimize re-renders
+- Use context selectors pattern or separate contexts for better performance
 
 ### 4. React Native Reanimated Animations
 
@@ -416,12 +419,27 @@ export interface UserPreferences {
   notificationsEnabled: boolean;
 }
 
-// Zustand store state
-export interface TaskStoreState {
+// Task context state
+export interface TaskState {
   tasks: Task[];
   isLoading: boolean;
   error: string | null;
-  // Actions
+}
+
+// Task reducer actions
+export type TaskAction =
+  | { type: 'SET_TASKS'; payload: Task[] }
+  | { type: 'ADD_TASK'; payload: Task }
+  | { type: 'UPDATE_TASK'; payload: { id: string; updates: Partial<Task> } }
+  | { type: 'DELETE_TASK'; payload: string }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null };
+
+// Task context type
+export interface TaskContextType {
+  state: TaskState;
+  dispatch: React.Dispatch<TaskAction>;
+  // Helper functions
   addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateTask: (id: string, updates: Partial<Omit<Task, 'id' | 'createdAt'>>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
@@ -448,9 +466,10 @@ export interface EmptyStateProps {
 
 - All entity types strictly typed (no `any`)
 - Firestore document types separate from domain types (Timestamp vs Date)
-- Store state includes both data and action types
+- Context state and reducer actions fully typed
 - Component prop types for all major UI components
 - Use `Omit`, `Partial`, and `Pick` utility types for derived types
+- Discriminated unions for reducer actions
 
 ### 3. quickstart.md
 
@@ -476,7 +495,7 @@ export interface EmptyStateProps {
 
    ```bash
    # Use npx expo install for SDK-compatible versions
-   npx expo install expo-router react-native-reanimated zustand
+   npx expo install expo-router react-native-reanimated
    npx expo install firebase @react-native-async-storage/async-storage
    npx expo install expo-notifications @react-native-community/netinfo
    npx expo install react-native-web react-dom @expo/metro-runtime

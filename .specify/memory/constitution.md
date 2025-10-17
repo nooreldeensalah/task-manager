@@ -89,14 +89,14 @@ FOLLOW-UP ITEMS:
 
 **Rule**: State management MUST be predictable, scalable, and maintainable.
 
-- Local component state for UI-only concerns (e.g., input focus, dropdown open/closed)
-- Context API for shared state within feature boundaries (e.g., theme, user preferences)
-- State management library (Redux, Zustand, or similar) for global application state
+- Local component state (useState) for UI-only concerns (e.g., input focus, dropdown open/closed)
+- Context API + useReducer for shared state within feature boundaries (e.g., task management, theme, user preferences)
+- Built-in React state management is preferred; external libraries require explicit justification
 - State shape MUST be normalized to avoid duplication and ensure consistency
-- State mutations MUST be traceable and follow unidirectional data flow
+- State mutations MUST be traceable and follow unidirectional data flow (reducer pattern)
 - Side effects (API calls, storage) MUST be isolated from state update logic
 
-**Rationale**: Disciplined state management prevents bugs, makes the application predictable, enables time-travel debugging, and scales with application complexity.
+**Rationale**: Disciplined state management prevents bugs, makes the application predictable, reduces external dependencies, and scales with application complexity using React's built-in capabilities.
 
 ## Technology Standards
 
