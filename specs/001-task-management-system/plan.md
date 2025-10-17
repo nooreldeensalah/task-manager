@@ -5,7 +5,7 @@
 
 ## Summary
 
-Build a cross-platform task management application using React Native with Expo that allows users to add, complete, and delete tasks. Tasks are stored anonymously in Firestore with offline support. The app features a polished UI with animations, theme support (dark/light), push notifications for reminders, and automated web deployment to GitHub Pages via CI/CD. The application emphasizes TypeScript-first development, component modularity, and excellent UX across web and mobile platforms.
+Build a cross-platform task management application using React Native with Expo that allows users to add, complete, and delete tasks. Tasks are stored anonymously in Firestore with an online-first data flow. The app features a polished UI with animations, theme support (dark/light), push notifications for reminders, and automated web deployment to GitHub Pages via CI/CD. The application emphasizes TypeScript-first development, component modularity, and excellent UX across web and mobile platforms.
 
 ## Technical Context
 
@@ -14,14 +14,14 @@ Build a cross-platform task management application using React Native with Expo 
 
 - **Framework**: Expo (React Native) with web support via `react-native-web`
 - **State Management**: React Context API + useReducer for global state (built-in, no external dependencies)
-- **Database**: Firestore SDK with offline persistence enabled
+- **Database**: Firestore SDK configured for real-time updates and robust error handling
 - **Navigation**: React Navigation 6.x (stack + tab navigators)
 - **UI Components**: React Native Paper or NativeBase (consistent cross-platform design system)
 - **Animations**: React Native Reanimated 3.x for 60fps animations
 - **Notifications**: Expo Notifications API
 - **Theme**: React Native Paper theming or custom Context-based theme provider
 
-**Storage**: Firestore (cloud-based NoSQL) with local persistence for offline support
+**Storage**: Firestore (cloud-based NoSQL) with online-first reads/writes; local caching deferred
 **Testing**: Jest + React Native Testing Library (component/integration tests)
 **Target Platform**: Cross-platform - Web (GitHub Pages), iOS 13+, Android 8+
 **Project Type**: Mobile (React Native with web support)
@@ -37,7 +37,7 @@ Build a cross-platform task management application using React Native with Expo 
 - TypeScript strict mode (NON-NEGOTIABLE per constitution)
 - 500 character task description limit
 - Anonymous user model (no authentication for MVP)
-- Offline-capable with automatic sync
+- Online-first experience; extended offline behavior is deferred
 - Must work on web, iOS, and Android with single codebase
 
 **Scale/Scope**:
@@ -78,7 +78,7 @@ Build a cross-platform task management application using React Native with Expo 
 - ✅ **PASS**: Smooth 60fps animations using Reanimated (FR-015)
 - ✅ **PASS**: Empty states, loading states, error states explicitly designed (FR-018, FR-019)
 - ✅ **PASS**: Confirmation dialogs for destructive actions (deletion confirmation)
-- ✅ **PASS**: Offline status indicators
+- ✅ **PASS**: Clear, actionable error messaging for failed network operations
 - ✅ **PASS**: Character count feedback for task input
 
 ### V. State Management Discipline
@@ -148,7 +148,7 @@ specs/001-task-management-system/
 ├── hooks/                        # Custom React hooks
 │   ├── useTheme.ts               # Theme context hook
 │   ├── useTasks.ts               # Task operations hook
-│   └── useOfflineStatus.ts      # Network status monitoring
+│   └── useFeedback.ts           # Handles toast/alert surface for network errors
 │
 ├── types/                        # Shared TypeScript types
 │   ├── task.ts                   # Task entity types
@@ -235,22 +235,21 @@ This structure supports:
 - Web-specific asset handling and responsive design strategies
 - Platform detection patterns using `Platform.OS === 'web'`
 
-### 2. Firestore Offline Persistence
+### 2. Firestore Sync & Error Handling
 
 **Questions to Answer**:
 
-- How to enable offline persistence in React Native?
-- What is the queueing mechanism for offline changes?
-- How to detect online/offline status and notify users?
-- What are the conflict resolution strategies?
+- How to structure Firestore listeners for reliable real-time updates?
+- How to surface errors from failed writes or reads to the UI?
+- What retry strategies are recommended for transient network issues?
+- How to prevent duplicate mutations when retries occur?
 
 **Expected Findings**:
 
-- `enableIndexedDbPersistence()` for web, `enablePersistence()` for native
-- Firestore automatically queues writes when offline
-- Use `NetInfo` from `@react-native-community/netinfo` for network status
-- Firestore uses last-write-wins for conflict resolution
-- Consider optimistic UI updates for better UX
+- Use `onSnapshot` for live updates with cleanup to avoid memory leaks
+- Capture errors from `addDoc`, `updateDoc`, `deleteDoc` and map them to user-friendly messages
+- Implement exponential backoff or Firestore SDK built-in retries for transient failures
+- Track pending operations in reducer state to avoid duplicate UI updates on retry
 
 ### 3. React Context API + useReducer Pattern
 

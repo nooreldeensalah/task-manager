@@ -11,7 +11,7 @@
 
 - Q: Should the MVP require user authentication, or should tasks be anonymous/public for the initial version? → A: Anonymous/Public tasks - no authentication required, tasks stored without user association (MVP approach)
 - Q: Should task deletion require user confirmation, or happen immediately? → A: Require confirmation - show a confirmation dialog before deleting any task
-- Q: How should the app behave when Firestore is offline or unreachable? → A: Queue changes, retry on reconnect - allow users to add/edit tasks offline, sync automatically when online
+- Q: How should the app behave when Firestore is offline or unreachable? → A: Show an inline error state and let users retry actions once the connection returns; no offline queueing for MVP
 - Q: Should there be a maximum character limit for task descriptions? → A: 500 characters - sufficient for detailed task descriptions, prevents abuse
 - Q: What should the empty state message say when no tasks exist? → A: Action-oriented - "Get started by adding your first task!" or similar encouraging message
 
@@ -124,13 +124,13 @@ The app must be accessible on the web and automatically deployed when changes ar
 ### Edge Cases
 
 - What happens when the user tries to add a task with an empty description? → System prevents creation and shows validation message (FR-007)
-- What happens when Firestore connection is lost or unavailable? → Changes are queued locally and synced automatically when connection restored (FR-009b, FR-009c)
+- What happens when Firestore connection is lost or unavailable? → App surfaces a non-blocking error state and lets the user retry once the connection returns (FR-019a)
 - What happens when the user tries to set a reminder time in the past?
 - How does the system handle tasks with very long descriptions (e.g., 1000+ characters)? → System enforces 500 character limit and prevents exceeding it (FR-001a, FR-007a)
 - What happens when the user rapidly taps add/delete multiple times?
 - How does the app behave when switching themes during an animation?
 - What happens if push notification permissions are denied?
-- How does the web version handle offline scenarios? → Same as mobile: queue changes and sync on reconnect (FR-009b, FR-009c)
+- How does the web version handle offline scenarios? → Web experience mirrors mobile: show the error state and disable additional mutations until the connection returns (FR-019a)
 - What happens when the user has hundreds or thousands of tasks?
 
 ## Requirements *(mandatory)*
@@ -153,11 +153,10 @@ The app must be accessible on the web and automatically deployed when changes ar
 - **FR-007a**: System MUST prevent creation of tasks exceeding 500 character limit
 - **FR-007b**: System MUST show validation error message when user attempts to exceed character limit
 - **FR-008**: System MUST load existing tasks when the app launches
-- **FR-009**: System MUST sync task changes across all platforms (web and mobile) in near real-time
+- **FR-009**: System MUST sync task changes across all platforms (web and mobile) in near real-time while connected
 - **FR-009a**: System MUST store tasks anonymously without user authentication for MVP
-- **FR-009b**: System MUST queue task changes locally when Firestore is offline or unreachable
-- **FR-009c**: System MUST automatically sync queued changes when connection is restored
-- **FR-009d**: System MUST allow users to create, edit, and delete tasks while offline with changes persisted locally
+- **FR-009b**: System MUST notify users when a sync attempt fails because of connectivity issues and offer a retry action
+- **FR-009c**: System MUST recover gracefully from transient connectivity issues without duplicating or losing tasks once connection is restored
 
 #### Detailed Task View (P2)
 
@@ -175,8 +174,7 @@ The app must be accessible on the web and automatically deployed when changes ar
 - **FR-018**: System MUST provide empty state messaging when no tasks exist
 - **FR-018a**: Empty state message MUST be action-oriented and encouraging (e.g., "Get started by adding your first task!")
 - **FR-019**: System MUST show loading indicators during data fetch operations
-- **FR-019a**: System MUST display connection status indicator when offline
-- **FR-019b**: System MUST show visual feedback when changes are queued for sync (e.g., pending sync indicator)
+- **FR-019a**: System MUST display a clear, actionable error state when network requests fail
 
 #### Theme Support (P3)
 
@@ -243,7 +241,7 @@ The app must be accessible on the web and automatically deployed when changes ar
 ## Assumptions
 
 - Firestore is configured and accessible from the app
-- Firestore offline persistence is enabled for seamless offline/online transitions
+- Application assumes an active internet connection for data operations; extended offline support is out of scope for MVP
 - GitHub Pages is set up for the repository
 - Users grant necessary permissions for notifications (P3 feature)
 - EAS build services are configured for mobile releases
@@ -278,7 +276,7 @@ The app must be accessible on the web and automatically deployed when changes ar
 - File attachments or rich media in tasks
 - Search or filtering functionality
 - Task history or audit logs
-- Offline-first architecture (basic offline tolerance acceptable)
+- Offline queueing, offline-first workflows, or background sync beyond basic error messaging
 - Native platform-specific features beyond notifications
 - Analytics or usage tracking
 - Internationalization/localization
