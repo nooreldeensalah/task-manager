@@ -3,11 +3,11 @@ import { useCallback, useContext } from 'react';
 
 import { TaskContext } from '@/contexts/TaskContext';
 import {
-    createTask as createTaskService,
-    deleteTask as deleteTaskService,
-    fetchTasks as fetchTasksService,
-    subscribeToTasks as subscribeToTasksService,
-    updateTask as updateTaskService,
+  createTask as createTaskService,
+  deleteTask as deleteTaskService,
+  fetchTasks as fetchTasksService,
+  subscribeToTasks as subscribeToTasksService,
+  updateTask as updateTaskService,
 } from '@/services/taskService';
 import type { Task, TaskDraft, TaskId, TaskUpdate } from '@/types/task';
 import { normalizeDescription, normalizeTitle } from '@/utils/validation';
@@ -78,15 +78,25 @@ export const useTasks = () => {
           return;
         }
 
+        const normalizedTitle =
+          updates.title !== undefined
+            ? normalizeTitle(updates.title)
+            : undefined;
+
+        const normalizedDescription =
+          updates.description !== undefined
+            ? normalizeDescription(updates.description ?? '')
+            : undefined;
+
         const updatedTask: Task = {
           ...existing,
           title:
-            updates.title !== undefined
-              ? normalizeTitle(updates.title)
-              : existing.title,
+            normalizedTitle !== undefined && normalizedTitle.length === 0
+              ? 'Untitled task'
+              : normalizedTitle ?? existing.title,
           description:
-            updates.description !== undefined
-              ? normalizeDescription(updates.description)
+            normalizedDescription !== undefined
+              ? normalizedDescription
               : existing.description,
           completed:
             updates.completed !== undefined ? updates.completed : existing.completed,

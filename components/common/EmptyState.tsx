@@ -22,7 +22,7 @@ export const EmptyState = ({ title, description, action }: EmptyStateProps) => {
         accessibilityRole="image"
         accessibilityLabel="Clipboard illustration">
         <Text style={styles.emoji} accessibilityElementsHidden>
-          📋
+          ➕
         </Text>
       </View>
       <Text style={[styles.title, { color: palette.text }]}>{title}</Text>

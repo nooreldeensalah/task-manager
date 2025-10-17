@@ -1,19 +1,19 @@
 import {
-    Timestamp,
-    addDoc,
-    collection,
-    deleteDoc,
-    doc,
-    getDocs,
-    onSnapshot,
-    orderBy,
-    query,
-    serverTimestamp,
-    updateDoc,
-    type DocumentData,
-    type FirestoreError,
-    type QueryDocumentSnapshot,
-    type Unsubscribe,
+  Timestamp,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  type DocumentData,
+  type FirestoreError,
+  type QueryDocumentSnapshot,
+  type Unsubscribe,
 } from 'firebase/firestore';
 
 import { FIRESTORE_COLLECTIONS } from '@/constants/Config';
@@ -60,11 +60,13 @@ const nullableTimestampToDate = (value: Timestamp | Date | null | undefined): Da
 const mapSnapshotToTask = (snapshot: QueryDocumentSnapshot<DocumentData>): Task => {
   const data = snapshot.data();
   const fallbackDate = new Date();
+  const normalizedTitle = normalizeTitle(data.title ?? '') || normalizeTitle(data.description ?? '') || 'Untitled task';
+  const normalizedDescription = normalizeDescription(data.description ?? '');
 
   return {
     id: snapshot.id,
-    title: data.title ?? '',
-    description: data.description ?? '',
+    title: normalizedTitle,
+    description: normalizedDescription,
     completed: Boolean(data.completed),
     createdAt: timestampToDate(data.createdAt, fallbackDate),
     updatedAt: timestampToDate(data.updatedAt, fallbackDate),
@@ -75,13 +77,14 @@ const mapSnapshotToTask = (snapshot: QueryDocumentSnapshot<DocumentData>): Task 
 };
 
 export const createTask = async (draft: TaskDraft): Promise<Task> => {
-  const trimmedTitle = normalizeTitle(draft.title);
-  const trimmedDescription = normalizeDescription(draft.description);
+  const trimmedTitle = normalizeTitle(draft.title) || 'Untitled task';
+  const trimmedDescription = normalizeDescription(draft.description ?? '');
+  const descriptionValue = trimmedDescription.length > 0 ? trimmedDescription : null;
   const now = new Date();
 
   const docRef = await addDoc(tasksCollection(), {
     title: trimmedTitle,
-    description: trimmedDescription,
+    description: descriptionValue,
     completed: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -111,11 +114,13 @@ export const updateTask = async (taskId: TaskId, updates: TaskUpdate): Promise<v
   };
 
   if (updates.description !== undefined) {
-    payload.description = normalizeDescription(updates.description);
+    const normalizedDescription = normalizeDescription(updates.description ?? '');
+    payload.description = normalizedDescription.length > 0 ? normalizedDescription : null;
   }
 
   if (updates.title !== undefined) {
-    payload.title = normalizeTitle(updates.title);
+    const normalizedTitle = normalizeTitle(updates.title);
+    payload.title = normalizedTitle || 'Untitled task';
   }
 
   if (updates.completed !== undefined) {

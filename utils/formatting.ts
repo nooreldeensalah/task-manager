@@ -86,3 +86,15 @@ export const formatRelativeTime = (value: Date | string | number): string => {
   const diffDays = Math.round(diffHours / 24);
   return rtf.format(-diffDays, 'day');
 };
+
+export const pad = (value: number): string => value.toString().padStart(2, '0');
+
+export const formatDateInput = (date: Date): string => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+export const formatTimeInput = (date: Date): string => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
+export const roundToMinute = (date: Date): Date => {
+  const next = new Date(date);
+  next.setSeconds(0, 0);
+  return next;
+};

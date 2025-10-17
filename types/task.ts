@@ -16,14 +16,14 @@ export interface Task {
 
 export interface TaskDraft {
   title: string;
-  description: string;
+  description?: string | null;
   dueDate?: Date | null;
   notificationId?: string | null;
 }
 
 export interface TaskUpdate {
   title?: string;
-  description?: string;
+  description?: string | null;
   completed?: boolean;
   completedAt?: Date | null;
   dueDate?: Date | null;
@@ -32,7 +32,7 @@ export interface TaskUpdate {
 
 export interface TaskDocument {
   title: string;
-  description: string;
+  description?: string | null;
   completed: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;

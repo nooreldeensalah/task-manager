@@ -36,7 +36,7 @@ export const TaskList = ({
 
   return (
     <ScrollView
-      style={[styles.scrollView, { backgroundColor: palette.surface }]}
+      style={[styles.scrollView, { backgroundColor: 'transparent' }]}
       contentContainerStyle={styles.contentContainer}
       refreshControl={
         onRefresh ? (
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    padding: 16,
+    paddingTop: 12,
   },
   list: {
     flexGrow: 1,

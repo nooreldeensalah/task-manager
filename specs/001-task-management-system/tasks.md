@@ -203,11 +203,11 @@
 ### Implementation for User Story 5
 
 - [ ] T087 [P] [US5] Create notificationService in `services/notificationService.ts` with permission requests
-- [ ] T088 [P] [US5] Add dueDate field to Task type in `types/task.ts`
+- [x] T088 [P] [US5] Add dueDate field to Task type in `types/task.ts`
 - [ ] T089 [US5] Implement scheduleNotification function in notificationService
 - [ ] T090 [US5] Implement cancelNotification function in notificationService
-- [ ] T091 [US5] Add date picker component to TaskInput for due date selection
-- [ ] T092 [US5] Add date picker to task detail edit mode
+- [x] T091 [US5] Add date picker component to TaskInput for due date selection
+- [x] T092 [US5] Add date picker to task detail edit mode
 - [ ] T093 [US5] Update createTask to schedule notification if dueDate is set
 - [ ] T094 [US5] Update updateTask to reschedule notification if dueDate changes
 - [ ] T095 [US5] Update deleteTask to cancel notification in taskService

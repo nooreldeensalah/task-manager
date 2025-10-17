@@ -1,7 +1,9 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import Button from '@/components/common/Button';
+import DueDateField from '@/components/common/DueDateField';
 import Input from '@/components/common/Input';
 import Colors from '@/constants/Colors';
 import { TASK_DESCRIPTION_MAX_LENGTH, TASK_TITLE_MAX_LENGTH } from '@/constants/Config';
@@ -16,8 +18,10 @@ export interface TaskDetailCardProps {
   editing: boolean;
   titleError?: string | null;
   descriptionError?: string | null;
+  dueDateDraft: Date | null;
   onChangeTitle: (text: string) => void;
   onChangeDescription: (text: string) => void;
+  onChangeDueDate: (date: Date | null) => void;
   onStartEditing: () => void;
   onCancelEditing: () => void;
   onSave: () => void;
@@ -33,8 +37,10 @@ export const TaskDetailCard = ({
   editing,
   titleError,
   descriptionError,
+  dueDateDraft,
   onChangeTitle,
   onChangeDescription,
+  onChangeDueDate,
   onStartEditing,
   onCancelEditing,
   onSave,
@@ -79,14 +85,60 @@ export const TaskDetailCard = ({
     <View style={[styles.card, { backgroundColor: palette.surfaceElevated, borderColor: palette.border }]}
       accessibilityLabel="Task details card">
       <View style={styles.headerRow}>
-        <Text style={[styles.title, { color: palette.text }]}>Task details</Text>
-        <Button
-          label={task.completed ? 'Mark incomplete' : 'Mark complete'}
-          variant={task.completed ? 'secondary' : 'primary'}
-          onPress={() => onToggleCompletion(!task.completed)}
-          disabled={updatingStatus}
-          loading={updatingStatus}
-        />
+        <View style={styles.titleSection}>
+          <Text style={[styles.primaryTitle, { color: task.completed ? palette.textMuted : palette.text }]} accessibilityLabel="Task title">
+            {task.title}
+          </Text>
+          {task.completed && (
+            <View style={styles.completedBadge}>
+              <MaterialCommunityIcons name="check-circle" size={16} color={palette.success} />
+              <Text style={[styles.completedText, { color: palette.success }]}>Completed</Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.headerActions}>
+          {!editing && (
+            <Pressable
+              onPress={onStartEditing}
+              style={({ pressed }) => [
+                styles.iconButton,
+                {
+                  backgroundColor: pressed ? palette.surface : 'transparent',
+                  borderColor: palette.border,
+                }
+              ]}
+              accessibilityLabel="Edit task"
+              accessibilityRole="button"
+            >
+              <MaterialCommunityIcons name="pencil" size={20} color={palette.text} />
+            </Pressable>
+          )}
+          <Pressable
+            onPress={() => onToggleCompletion(!task.completed)}
+            disabled={updatingStatus}
+            style={({ pressed }) => [
+              styles.iconButton,
+              {
+                backgroundColor: task.completed
+                  ? (pressed ? palette.surface : palette.surfaceElevated)
+                  : (pressed ? palette.primaryMuted : palette.primary),
+                borderColor: task.completed ? palette.border : 'transparent',
+              }
+            ]}
+            accessibilityLabel={task.completed ? "Mark incomplete" : "Mark complete"}
+            accessibilityRole="button"
+          >
+            {updatingStatus ? (
+              <ActivityIndicator size="small" color={task.completed ? palette.text : palette.background} />
+            ) : (
+              <MaterialCommunityIcons
+                name={task.completed ? 'check-circle-outline' : 'check-circle'}
+                size={20}
+                color={task.completed ? palette.text : palette.background}
+              />
+            )}
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.section}>
@@ -99,12 +151,11 @@ export const TaskDetailCard = ({
               maxLength={TASK_TITLE_MAX_LENGTH}
               errorText={titleError}
               accessibilityLabel="Edit task title"
-              autoFocus
               returnKeyType="next"
               blurOnSubmit={false}
             />
             <Input
-              label="Description"
+              label="Description (optional)"
               multiline
               value={descriptionDraft}
               onChangeText={onChangeDescription}
@@ -113,14 +164,14 @@ export const TaskDetailCard = ({
               errorText={descriptionError}
               accessibilityLabel="Edit task description"
               textAlignVertical="top"
+              placeholder="Add more context (optional)"
+              helperText="Optional — leave blank if not needed"
               style={styles.input}
             />
+            <DueDateField value={dueDateDraft} onChange={onChangeDueDate} label="Due date (optional)" mode="datetime" />
           </>
         ) : (
           <View style={styles.summarySection}>
-            <Text style={[styles.primaryTitle, { color: palette.text }]} accessibilityLabel="Task title">
-              {task.title}
-            </Text>
             <Text
               style={[styles.descriptionText, { color: palette.textMuted }]}
               accessibilityLabel="Task description">
@@ -158,9 +209,7 @@ export const TaskDetailCard = ({
               fullWidth
             />
           </>
-        ) : (
-          <Button label="Edit task details" variant="secondary" onPress={onStartEditing} />
-        )}
+        ) : null}
       </View>
     </View>
   );
@@ -175,9 +224,36 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: 16,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  iconButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    minWidth: 40,
+    minHeight: 40,
+    borderRadius: 10,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  titleSection: {
+    flex: 1,
+    gap: 8,
+  },
+  completedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  completedText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   title: {
     fontSize: 20,

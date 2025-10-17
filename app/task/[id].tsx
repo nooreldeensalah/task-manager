@@ -1,9 +1,8 @@
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import Button from '@/components/common/Button';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingIndicator from '@/components/common/LoadingIndicator';
 import TaskDetailCard from '@/components/task/TaskDetailCard';
@@ -14,7 +13,6 @@ import { validateTaskDescription, validateTaskTitle } from '@/utils/validation';
 
 export default function TaskDetailScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const router = useRouter();
   const { theme } = useTheme();
   const palette = Colors[theme];
   const {
@@ -30,6 +28,7 @@ export default function TaskDetailScreen() {
   const [editing, setEditing] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
   const [descriptionDraft, setDescriptionDraft] = useState('');
+  const [dueDateDraft, setDueDateDraft] = useState<Date | null>(null);
   const [titleError, setTitleError] = useState<string | null>(null);
   const [descriptionError, setDescriptionError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -50,8 +49,9 @@ export default function TaskDetailScreen() {
     if (task) {
       setTitleDraft(task.title);
       setDescriptionDraft(task.description);
+      setDueDateDraft(task.dueDate ?? null);
     }
-  }, [task?.description, task?.title, task]);
+  }, [task?.description, task?.dueDate, task?.title, task]);
 
   useEffect(() => {
     if (!error) {
@@ -70,6 +70,7 @@ export default function TaskDetailScreen() {
 
     setTitleDraft(task.title);
     setDescriptionDraft(task.description);
+    setDueDateDraft(task.dueDate ?? null);
     setTitleError(null);
     setDescriptionError(null);
     setEditing(true);
@@ -79,6 +80,7 @@ export default function TaskDetailScreen() {
     if (task) {
       setTitleDraft(task.title);
       setDescriptionDraft(task.description);
+      setDueDateDraft(task.dueDate ?? null);
     }
 
     setTitleError(null);
@@ -102,6 +104,10 @@ export default function TaskDetailScreen() {
     setDescriptionDraft(text);
   }, [descriptionError]);
 
+  const handleChangeDueDate = useCallback((date: Date | null) => {
+    setDueDateDraft(date);
+  }, []);
+
   const handleSave = useCallback(async () => {
     if (!task) {
       return;
@@ -120,9 +126,11 @@ export default function TaskDetailScreen() {
     setSaving(true);
 
     try {
+      const trimmedDescription = descriptionDraft.trim();
       await updateTask(task.id, {
         title: titleDraft,
-        description: descriptionDraft,
+        description: trimmedDescription.length > 0 ? trimmedDescription : null,
+        dueDate: dueDateDraft ?? null,
       });
       setEditing(false);
     } catch (saveError) {
@@ -131,7 +139,7 @@ export default function TaskDetailScreen() {
     } finally {
       setSaving(false);
     }
-  }, [descriptionDraft, task, titleDraft, updateTask]);
+  }, [descriptionDraft, dueDateDraft, task, titleDraft, updateTask]);
 
   const handleToggleCompletion = useCallback(async (completed: boolean) => {
     if (!task) {
@@ -141,20 +149,13 @@ export default function TaskDetailScreen() {
     setUpdatingStatus(true);
     try {
       await updateTask(task.id, { completed });
+      await fetchTasks();
+    } catch (error) {
+      console.error('Failed to toggle task completion:', error);
     } finally {
       setUpdatingStatus(false);
     }
-  }, [task, updateTask]);
-
-  const handleRetry = useCallback(() => {
-    fetchTasks().catch(() => {
-      // Errors handled elsewhere
-    });
-  }, [fetchTasks]);
-
-  const handleBackToList = useCallback(() => {
-    router.replace('/(tabs)');
-  }, [router]);
+  }, [task, updateTask, fetchTasks]);
 
   const headerTitle = task ? task.title : 'Task not found';
 
@@ -180,7 +181,6 @@ export default function TaskDetailScreen() {
                 title="Task not found"
                 description="It may have been deleted or you might have opened an outdated link."
               />
-              <Button label="Back to tasks" onPress={handleBackToList} />
             </View>
           ) : null}
 
@@ -192,8 +192,10 @@ export default function TaskDetailScreen() {
               editing={editing}
               titleError={titleError}
               descriptionError={descriptionError}
+              dueDateDraft={dueDateDraft}
               onChangeTitle={handleChangeTitle}
               onChangeDescription={handleChangeDescription}
+              onChangeDueDate={handleChangeDueDate}
               onStartEditing={handleStartEditing}
               onCancelEditing={handleCancelEditing}
               onSave={handleSave}
@@ -201,13 +203,6 @@ export default function TaskDetailScreen() {
               saving={saving}
               updatingStatus={updatingStatus}
             />
-          ) : null}
-
-          {task && !editing ? (
-            <View style={styles.secondaryActions}>
-              <Button label="Back to tasks" variant="ghost" onPress={handleBackToList} />
-              <Button label="Refresh" variant="secondary" onPress={handleRetry} />
-            </View>
           ) : null}
         </View>
       </SafeAreaView>
@@ -228,8 +223,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     gap: 16,
-  },
-  secondaryActions: {
-    gap: 12,
   },
 });
