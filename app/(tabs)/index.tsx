@@ -1,7 +1,9 @@
+import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import Button from '@/components/common/Button';
 import EmptyState from '@/components/common/EmptyState';
 import TaskInput from '@/components/task/TaskInput';
 import TaskList from '@/components/task/TaskList';
@@ -11,6 +13,7 @@ import { useTheme } from '@/hooks/useTheme';
 import type { TaskId } from '@/types/task';
 
 export default function TaskListScreen() {
+  const router = useRouter();
   const { theme } = useTheme();
   const palette = Colors[theme];
   const {
@@ -30,25 +33,20 @@ export default function TaskListScreen() {
 
   useEffect(() => {
     const unsubscribe = subscribeToTasks();
-    return unsubscribe;
-  }, [subscribeToTasks]);
 
-  useEffect(() => {
-    if (!error) {
-      return;
-    }
-
-    Alert.alert('Something went wrong', error, [{ text: 'Dismiss', onPress: clearError }], {
-      onDismiss: clearError,
+    fetchTasks().catch(() => {
+      // Errors are surfaced via context state.
     });
-  }, [error, clearError]);
+
+    return unsubscribe;
+  }, [fetchTasks, subscribeToTasks]);
 
   const handleCreateTask = useCallback(
-    async (description: string) => {
+    async ({ title, description }: { title: string; description: string }) => {
       setCreating(true);
 
       try {
-        await createTask({ description });
+        await createTask({ title, description });
       } finally {
         setCreating(false);
       }
@@ -80,6 +78,15 @@ export default function TaskListScreen() {
     }
   }, [fetchTasks]);
 
+  const handleRetrySync = useCallback(async () => {
+    clearError();
+    await handleRefresh();
+  }, [clearError, handleRefresh]);
+
+  const handleTaskPress = useCallback((taskId: TaskId) => {
+    router.push(`/task/${taskId}`);
+  }, [router]);
+
   const emptyState = useMemo(
     () => (
       <EmptyState
@@ -91,24 +98,50 @@ export default function TaskListScreen() {
   );
 
   return (
-    <SafeAreaView
-      style={[styles.safeArea, { backgroundColor: palette.background }]}
-    >
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+      <View style={[styles.container, { backgroundColor: palette.background }]}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: palette.text }]}>My Tasks</Text>
           <Text style={[styles.subtitle, { color: palette.textMuted }]}>Stay on top of your day</Text>
         </View>
-        <TaskInput onSubmit={handleCreateTask} loading={creating} />
-        <TaskList
-          tasks={tasks}
-          onToggleTask={handleToggleTask}
-          onDeleteTask={handleDeleteTask}
-          refreshing={refreshing}
-          onRefresh={handleRefresh}
-          ListEmptyComponent={emptyState}
-          loading={loading && !refreshing}
-        />
+
+        {error ? (
+          <View
+            style={[
+              styles.errorBanner,
+              { backgroundColor: palette.surfaceElevated, borderColor: palette.danger },
+            ]}
+            accessibilityRole="alert"
+            accessibilityLiveRegion="polite"
+          >
+            <Text style={[styles.errorTitle, { color: palette.danger }]}>We ran into a sync issue</Text>
+            <Text style={[styles.errorMessage, { color: palette.text }]}>There was a problem syncing your tasks. Check your connection and try again.</Text>
+            <Text style={[styles.errorDetails, { color: palette.textMuted }]}>Details: {error}</Text>
+            <Button label="Retry sync" onPress={handleRetrySync} variant="primary" fullWidth />
+          </View>
+        ) : null}
+
+        <View
+          style={[
+            styles.inputCard,
+            { backgroundColor: palette.surfaceElevated, borderColor: palette.border },
+          ]}
+        >
+          <TaskInput onSubmit={handleCreateTask} loading={creating} />
+        </View>
+
+        <View style={styles.listContainer}>
+          <TaskList
+            tasks={tasks}
+            onToggleTask={handleToggleTask}
+            onDeleteTask={handleDeleteTask}
+            onTaskPress={handleTaskPress}
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            ListEmptyComponent={emptyState}
+            loading={loading && !refreshing}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -121,17 +154,45 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
+    paddingBottom: 16,
   },
   header: {
-    paddingTop: 12,
-    paddingBottom: 8,
-    gap: 4,
+    paddingVertical: 16,
+    gap: 6,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  errorBanner: {
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+    marginBottom: 16,
+  },
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  errorMessage: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  errorDetails: {
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  inputCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  listContainer: {
+    flex: 1,
   },
 });

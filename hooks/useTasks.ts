@@ -10,6 +10,7 @@ import {
     updateTask as updateTaskService,
 } from '@/services/taskService';
 import type { Task, TaskDraft, TaskId, TaskUpdate } from '@/types/task';
+import { normalizeDescription, normalizeTitle } from '@/utils/validation';
 
 const toErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -51,7 +52,7 @@ export const useTasks = () => {
       setLoading(true);
 
       try {
-        const newTask = await createTaskService(draft);
+  const newTask = await createTaskService(draft);
         dispatch({ type: 'ADD_TASK', payload: newTask });
         return newTask;
       } catch (error) {
@@ -79,13 +80,24 @@ export const useTasks = () => {
 
         const updatedTask: Task = {
           ...existing,
+          title:
+            updates.title !== undefined
+              ? normalizeTitle(updates.title)
+              : existing.title,
           description:
             updates.description !== undefined
-              ? updates.description.trim()
+              ? normalizeDescription(updates.description)
               : existing.description,
           completed:
             updates.completed !== undefined ? updates.completed : existing.completed,
-          dueDate: updates.dueDate !== undefined ? updates.dueDate ?? null : existing.dueDate ?? null,
+          completedAt:
+            updates.completed !== undefined
+              ? updates.completed
+                ? new Date()
+                : null
+              : existing.completedAt ?? null,
+          dueDate:
+            updates.dueDate !== undefined ? updates.dueDate ?? null : existing.dueDate ?? null,
           notificationId:
             updates.notificationId !== undefined
               ? updates.notificationId ?? null

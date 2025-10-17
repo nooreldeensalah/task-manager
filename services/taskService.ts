@@ -19,6 +19,7 @@ import {
 import { FIRESTORE_COLLECTIONS } from '@/constants/Config';
 import { getFirestoreInstance } from '@/services/firestore';
 import type { Task, TaskDraft, TaskId, TaskUpdate } from '@/types/task';
+import { normalizeDescription, normalizeTitle } from '@/utils/validation';
 
 const COLLECTION_PATH = FIRESTORE_COLLECTIONS.TASKS;
 
@@ -62,36 +63,41 @@ const mapSnapshotToTask = (snapshot: QueryDocumentSnapshot<DocumentData>): Task 
 
   return {
     id: snapshot.id,
+    title: data.title ?? '',
     description: data.description ?? '',
     completed: Boolean(data.completed),
     createdAt: timestampToDate(data.createdAt, fallbackDate),
     updatedAt: timestampToDate(data.updatedAt, fallbackDate),
+    completedAt: nullableTimestampToDate(data.completedAt),
     dueDate: nullableTimestampToDate(data.dueDate),
     notificationId: data.notificationId ?? null,
   };
 };
 
-const normalizeDescription = (description: string): string => description.trim();
-
 export const createTask = async (draft: TaskDraft): Promise<Task> => {
+  const trimmedTitle = normalizeTitle(draft.title);
   const trimmedDescription = normalizeDescription(draft.description);
   const now = new Date();
 
   const docRef = await addDoc(tasksCollection(), {
+    title: trimmedTitle,
     description: trimmedDescription,
     completed: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+    completedAt: null,
     dueDate: draft.dueDate ? Timestamp.fromDate(draft.dueDate) : null,
     notificationId: draft.notificationId ?? null,
   });
 
   return {
     id: docRef.id,
+    title: trimmedTitle,
     description: trimmedDescription,
     completed: false,
     createdAt: now,
     updatedAt: now,
+    completedAt: null,
     dueDate: draft.dueDate ?? null,
     notificationId: draft.notificationId ?? null,
   };
@@ -108,8 +114,13 @@ export const updateTask = async (taskId: TaskId, updates: TaskUpdate): Promise<v
     payload.description = normalizeDescription(updates.description);
   }
 
+  if (updates.title !== undefined) {
+    payload.title = normalizeTitle(updates.title);
+  }
+
   if (updates.completed !== undefined) {
     payload.completed = updates.completed;
+    payload.completedAt = updates.completed ? serverTimestamp() : null;
   }
 
   if (updates.dueDate !== undefined) {

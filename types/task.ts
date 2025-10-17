@@ -4,32 +4,39 @@ export type TaskId = string;
 
 export interface Task {
   id: TaskId;
+  title: string;
   description: string;
   completed: boolean;
   createdAt: Date;
   updatedAt: Date;
+  completedAt?: Date | null;
   dueDate?: Date | null;
   notificationId?: string | null;
 }
 
 export interface TaskDraft {
+  title: string;
   description: string;
   dueDate?: Date | null;
   notificationId?: string | null;
 }
 
 export interface TaskUpdate {
+  title?: string;
   description?: string;
   completed?: boolean;
+  completedAt?: Date | null;
   dueDate?: Date | null;
   notificationId?: string | null;
 }
 
 export interface TaskDocument {
+  title: string;
   description: string;
   completed: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  completedAt?: Timestamp | null;
   dueDate?: Timestamp | null;
   notificationId?: string | null;
 }

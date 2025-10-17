@@ -6,7 +6,7 @@ import ConfirmDialog from '@/components/common/ConfirmDialog';
 import Colors from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 import type { Task, TaskId } from '@/types/task';
-import { formatRelativeTime } from '@/utils/formatting';
+import { formatDateTime, formatRelativeTime } from '@/utils/formatting';
 
 export interface TaskItemProps {
   task: Task;
@@ -20,7 +20,22 @@ export const TaskItem = ({ task, onToggle, onDelete, onPress }: TaskItemProps) =
   const palette = Colors[theme];
   const [confirmVisible, setConfirmVisible] = useState(false);
 
-  const relativeDate = useMemo(() => formatRelativeTime(task.createdAt), [task.createdAt]);
+  const relativeDate = useMemo(() => {
+    const reference = task.completed
+      ? task.completedAt ?? task.updatedAt
+      : task.updatedAt;
+
+    return formatRelativeTime(reference);
+  }, [task.completed, task.completedAt, task.updatedAt]);
+
+  const dueDateLabel = useMemo(() => {
+    if (!task.dueDate) {
+      return null;
+    }
+
+    const relative = formatRelativeTime(task.dueDate);
+    return relative || formatDateTime(task.dueDate, { dateStyle: 'medium' });
+  }, [task.dueDate]);
 
   const handleToggle = useCallback(() => {
     onToggle(task.id, !task.completed);
@@ -52,7 +67,7 @@ export const TaskItem = ({ task, onToggle, onDelete, onPress }: TaskItemProps) =
     <>
       <Pressable
         accessibilityRole="button"
-        accessibilityHint="Toggle task completion or open details"
+        accessibilityHint={onPress ? 'Open task details' : 'Toggle task completion'}
         accessibilityState={{ checked: task.completed }}
         style={[
           styles.container,
@@ -80,16 +95,32 @@ export const TaskItem = ({ task, onToggle, onDelete, onPress }: TaskItemProps) =
         <View style={styles.content}>
           <Text
             style={[
-              styles.description,
+              styles.title,
               {
                 color: palette.text,
                 textDecorationLine: task.completed ? 'line-through' : 'none',
               },
             ]}
-            numberOfLines={3}>
-            {task.description}
+            numberOfLines={2}
+            accessibilityLabel="Task title">
+            {task.title}
           </Text>
-          <Text style={[styles.meta, { color: palette.textMuted }]}>{relativeDate}</Text>
+          {task.description ? (
+            <Text
+              style={[styles.description, { color: palette.textMuted }]}
+              numberOfLines={2}
+              accessibilityLabel="Task description">
+              {task.description}
+            </Text>
+          ) : null}
+          <View style={styles.metaRow}>
+            <Text style={[styles.meta, { color: palette.textMuted }]}>{relativeDate}</Text>
+            {dueDateLabel ? (
+              <Text style={[styles.due, { color: palette.danger }]} accessibilityLabel="Task due date">
+                Due {dueDateLabel}
+              </Text>
+            ) : null}
+          </View>
         </View>
         <Pressable
           accessibilityRole="button"
@@ -136,12 +167,25 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 6,
   },
-  description: {
+  title: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  description: {
+    fontSize: 14,
+    lineHeight: 20,
   },
   meta: {
     fontSize: 12,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  due: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   deleteButton: {
     padding: 4,

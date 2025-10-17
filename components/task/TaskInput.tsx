@@ -1,55 +1,89 @@
-import { useCallback, useState } from 'react';
-import { Keyboard, StyleSheet, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { Keyboard, StyleSheet, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/common/Button';
 import Input from '@/components/common/Input';
-import { TASK_DESCRIPTION_MAX_LENGTH } from '@/constants/Config';
-import { validateTaskDescription } from '@/utils/validation';
+import { TASK_DESCRIPTION_MAX_LENGTH, TASK_TITLE_MAX_LENGTH } from '@/constants/Config';
+import { validateTaskDescription, validateTaskTitle } from '@/utils/validation';
 
 export interface TaskInputProps {
-  onSubmit: (description: string) => Promise<void> | void;
+  onSubmit: (task: { title: string; description: string }) => Promise<void> | void;
   loading?: boolean;
 }
 
 export const TaskInput = ({ onSubmit, loading = false }: TaskInputProps) => {
+  const descriptionInputRef = useRef<TextInput | null>(null);
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
 
   const handleSubmit = useCallback(async () => {
-    const validationError = validateTaskDescription(description);
+    const titleValidationError = validateTaskTitle(title);
+    const descriptionValidationError = validateTaskDescription(description);
 
-    if (validationError) {
-      setError(validationError);
+    setTitleError(titleValidationError);
+    setDescriptionError(descriptionValidationError);
+
+    if (titleValidationError || descriptionValidationError) {
       return;
     }
 
     try {
-      await onSubmit(description.trim());
+      await onSubmit({ title, description });
+      setTitle('');
       setDescription('');
-      setError(null);
+      setTitleError(null);
+      setDescriptionError(null);
       Keyboard.dismiss();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Unable to create task.');
+      const message = submitError instanceof Error ? submitError.message : 'Unable to create task.';
+      setDescriptionError(message);
     }
-  }, [description, onSubmit]);
+  }, [description, onSubmit, title]);
+
+  const handleChangeTitle = useCallback((text: string) => {
+    setTitle(text);
+    if (titleError) {
+      setTitleError(null);
+    }
+  }, [titleError]);
 
   const handleChangeText = useCallback((text: string) => {
     setDescription(text);
-    if (error) {
-      setError(null);
+    if (descriptionError) {
+      setDescriptionError(null);
     }
-  }, [error]);
+  }, [descriptionError]);
 
   return (
     <View style={styles.container}>
       <Input
-        label="What needs to get done?"
-        placeholder="Add a task"
+        label="Task title"
+        placeholder="Add a title"
+        value={title}
+        onChangeText={handleChangeTitle}
+        helperText="Give your task a clear, action-oriented title"
+        errorText={titleError}
+        maxLength={TASK_TITLE_MAX_LENGTH}
+        accessibilityLabel="Task title"
+        autoCapitalize="sentences"
+        autoCorrect
+        returnKeyType="next"
+        blurOnSubmit={false}
+        onSubmitEditing={() => {
+          descriptionInputRef.current?.focus();
+        }}
+      />
+      <Input
+        ref={descriptionInputRef}
+        label="Task description"
+        placeholder="Add details"
         multiline
         value={description}
         onChangeText={handleChangeText}
         helperText="Keep it short and actionable"
-        errorText={error}
+        errorText={descriptionError}
         maxLength={TASK_DESCRIPTION_MAX_LENGTH}
         showCounter
         autoCorrect
@@ -62,7 +96,7 @@ export const TaskInput = ({ onSubmit, loading = false }: TaskInputProps) => {
         label="Add Task"
         onPress={handleSubmit}
         loading={loading}
-        disabled={description.trim().length === 0}
+        disabled={title.trim().length === 0 || description.trim().length === 0}
         fullWidth
         accessibilityLabel="Add task"
       />

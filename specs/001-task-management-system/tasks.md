@@ -132,14 +132,14 @@
 
 ### Implementation for User Story 2
 
-- [ ] T056 [P] [US2] Create TaskDetailCard component in `components/task/TaskDetailCard.tsx`
-- [ ] T057 [US2] Create dynamic route `app/task/[id].tsx` for task detail screen
-- [ ] T058 [US2] Implement task detail screen with TaskDetailCard showing description, timestamps, completion status
-- [ ] T059 [US2] Add edit mode toggle in detail screen
-- [ ] T060 [US2] Add inline editing capability for task description in detail screen
-- [ ] T061 [US2] Implement navigation from TaskItem to detail screen using Expo Router
-- [ ] T062 [US2] Add back/close navigation from detail screen to list
-- [ ] T063 [US2] Update taskService to support task updates in Firestore
+- [x] T056 [P] [US2] Create TaskDetailCard component in `components/task/TaskDetailCard.tsx`
+- [x] T057 [US2] Create dynamic route `app/task/[id].tsx` for task detail screen
+- [x] T058 [US2] Implement task detail screen with TaskDetailCard showing description, timestamps, completion status
+- [x] T059 [US2] Add edit mode toggle in detail screen
+- [x] T060 [US2] Add inline editing capability for task description in detail screen
+- [x] T061 [US2] Implement navigation from TaskItem to detail screen using Expo Router
+- [x] T062 [US2] Add back/close navigation from detail screen to list
+- [x] T063 [US2] Update taskService to support task updates in Firestore
 - [ ] T064 [US2] Test detail view: create task, navigate to detail, edit, navigate back, verify changes persist
 
 **Checkpoint**: At this point, User Stories 1, 6, AND 2 should all work independently
