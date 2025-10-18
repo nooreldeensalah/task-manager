@@ -21,9 +21,22 @@ import { getFirestoreInstance } from '@/services/firestore';
 import type { Task, TaskDraft, TaskId, TaskUpdate } from '@/types/task';
 import { normalizeDescription, normalizeTitle } from '@/utils/validation';
 
-const COLLECTION_PATH = FIRESTORE_COLLECTIONS.TASKS;
+const tasksCollection = (userId: string) =>
+  collection(
+    getFirestoreInstance(),
+    FIRESTORE_COLLECTIONS.USERS,
+    userId,
+    FIRESTORE_COLLECTIONS.TASKS,
+  );
 
-const tasksCollection = () => collection(getFirestoreInstance(), COLLECTION_PATH);
+const taskDocument = (userId: string, taskId: TaskId) =>
+  doc(
+    getFirestoreInstance(),
+    FIRESTORE_COLLECTIONS.USERS,
+    userId,
+    FIRESTORE_COLLECTIONS.TASKS,
+    taskId,
+  );
 
 const timestampToDate = (value: Timestamp | Date | null | undefined, fallback: Date): Date => {
   if (!value) {
@@ -76,13 +89,13 @@ const mapSnapshotToTask = (snapshot: QueryDocumentSnapshot<DocumentData>): Task 
   };
 };
 
-export const createTask = async (draft: TaskDraft): Promise<Task> => {
+export const createTask = async (userId: string, draft: TaskDraft): Promise<Task> => {
   const trimmedTitle = normalizeTitle(draft.title) || 'Untitled task';
   const trimmedDescription = normalizeDescription(draft.description ?? '');
   const descriptionValue = trimmedDescription.length > 0 ? trimmedDescription : null;
   const now = new Date();
 
-  const docRef = await addDoc(tasksCollection(), {
+  const docRef = await addDoc(tasksCollection(userId), {
     title: trimmedTitle,
     description: descriptionValue,
     completed: false,
@@ -106,8 +119,8 @@ export const createTask = async (draft: TaskDraft): Promise<Task> => {
   };
 };
 
-export const updateTask = async (taskId: TaskId, updates: TaskUpdate): Promise<void> => {
-  const docRef = doc(getFirestoreInstance(), COLLECTION_PATH, taskId);
+export const updateTask = async (userId: string, taskId: TaskId, updates: TaskUpdate): Promise<void> => {
+  const docRef = taskDocument(userId, taskId);
 
   const payload: Record<string, unknown> = {
     updatedAt: serverTimestamp(),
@@ -139,22 +152,23 @@ export const updateTask = async (taskId: TaskId, updates: TaskUpdate): Promise<v
   await updateDoc(docRef, payload);
 };
 
-export const deleteTask = async (taskId: TaskId): Promise<void> => {
-  const docRef = doc(getFirestoreInstance(), COLLECTION_PATH, taskId);
+export const deleteTask = async (userId: string, taskId: TaskId): Promise<void> => {
+  const docRef = taskDocument(userId, taskId);
   await deleteDoc(docRef);
 };
 
-export const fetchTasks = async (): Promise<Task[]> => {
-  const tasksQuery = query(tasksCollection(), orderBy('createdAt', 'desc'));
+export const fetchTasks = async (userId: string): Promise<Task[]> => {
+  const tasksQuery = query(tasksCollection(userId), orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(tasksQuery);
   return snapshot.docs.map(mapSnapshotToTask);
 };
 
 export const subscribeToTasks = (
+  userId: string,
   listener: (tasks: Task[]) => void,
   onError?: (error: FirestoreError) => void,
 ): Unsubscribe => {
-  const tasksQuery = query(tasksCollection(), orderBy('createdAt', 'desc'));
+  const tasksQuery = query(tasksCollection(userId), orderBy('createdAt', 'desc'));
 
   return onSnapshot(
     tasksQuery,

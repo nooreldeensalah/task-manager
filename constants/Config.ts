@@ -4,6 +4,7 @@ export const TASK_DESCRIPTION_MIN_LENGTH = 0;
 export const TASK_DESCRIPTION_MAX_LENGTH = 500;
 
 export const FIRESTORE_COLLECTIONS = {
+  USERS: 'users',
   TASKS: 'tasks',
 } as const;
 

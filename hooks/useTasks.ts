@@ -2,6 +2,7 @@ import type { FirestoreError, Unsubscribe } from 'firebase/firestore';
 import { useCallback, useContext } from 'react';
 
 import { TaskContext } from '@/contexts/TaskContext';
+import { useAuth } from '@/hooks/useAuth';
 import {
   createTask as createTaskService,
   deleteTask as deleteTaskService,
@@ -32,6 +33,13 @@ export const useTasks = () => {
   }
 
   const { state, dispatch } = context;
+  const { user } = useAuth();
+
+  if (!user) {
+    throw new Error('useTasks requires an authenticated user.');
+  }
+
+  const userId = user.uid;
 
   const setLoading = useCallback(
     (value: boolean) => {
@@ -52,7 +60,7 @@ export const useTasks = () => {
       setLoading(true);
 
       try {
-  const newTask = await createTaskService(draft);
+        const newTask = await createTaskService(userId, draft);
         dispatch({ type: 'ADD_TASK', payload: newTask });
         return newTask;
       } catch (error) {
@@ -63,7 +71,7 @@ export const useTasks = () => {
         setLoading(false);
       }
     },
-    [dispatch, setError, setLoading],
+    [dispatch, setError, setLoading, userId],
   );
 
   const updateTask = useCallback(
@@ -71,7 +79,7 @@ export const useTasks = () => {
       setLoading(true);
 
       try {
-        await updateTaskService(taskId, updates);
+        await updateTaskService(userId, taskId, updates);
 
         const existing = state.tasks.find((task) => task.id === taskId);
         if (!existing) {
@@ -124,7 +132,7 @@ export const useTasks = () => {
         setLoading(false);
       }
     },
-    [dispatch, setError, setLoading, state.tasks],
+    [dispatch, setError, setLoading, state.tasks, userId],
   );
 
   const deleteTask = useCallback(
@@ -132,7 +140,7 @@ export const useTasks = () => {
       setLoading(true);
 
       try {
-        await deleteTaskService(taskId);
+        await deleteTaskService(userId, taskId);
         dispatch({ type: 'DELETE_TASK', payload: taskId });
       } catch (error) {
         const message = toErrorMessage(error);
@@ -142,14 +150,14 @@ export const useTasks = () => {
         setLoading(false);
       }
     },
-    [dispatch, setError, setLoading],
+    [dispatch, setError, setLoading, userId],
   );
 
   const fetchTasks = useCallback(async (): Promise<Task[]> => {
     setLoading(true);
 
     try {
-      const tasks = await fetchTasksService();
+      const tasks = await fetchTasksService(userId);
       dispatch({ type: 'SET_TASKS', payload: tasks });
       return tasks;
     } catch (error) {
@@ -159,13 +167,14 @@ export const useTasks = () => {
     } finally {
       setLoading(false);
     }
-  }, [dispatch, setError, setLoading]);
+  }, [dispatch, setError, setLoading, userId]);
 
   const subscribeToTasks = useCallback(
     (onError?: (error: FirestoreError) => void): Unsubscribe => {
       setLoading(true);
 
       return subscribeToTasksService(
+        userId,
         (tasks) => {
           dispatch({ type: 'SET_TASKS', payload: tasks });
           setLoading(false);
@@ -179,7 +188,7 @@ export const useTasks = () => {
         },
       );
     },
-    [dispatch, setError, setLoading],
+    [dispatch, setError, setLoading, userId],
   );
 
   const clearError = useCallback(() => {

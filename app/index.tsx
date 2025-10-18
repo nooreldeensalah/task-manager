@@ -13,18 +13,22 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import AuthGate from '@/components/auth/AuthGate';
 import Button from '@/components/common/Button';
 import EmptyState from '@/components/common/EmptyState';
+import LoadingIndicator from '@/components/common/LoadingIndicator';
 import ResponsiveContainer from '@/components/common/ResponsiveContainer';
 import TaskInput from '@/components/task/TaskInput';
 import TaskList from '@/components/task/TaskList';
 import Colors from '@/constants/Colors';
+import { useAuth } from '@/hooks/useAuth';
 import { useTasks } from '@/hooks/useTasks';
 import { useTheme } from '@/hooks/useTheme';
 import type { TaskId } from '@/types/task';
 
-export default function TaskListScreen() {
+function TaskListContent() {
   const router = useRouter();
+  const { signOut: signOutUser, user } = useAuth();
   const { theme } = useTheme();
   const palette = Colors[theme];
   const {
@@ -116,6 +120,14 @@ export default function TaskListScreen() {
     router.push(`/task/${taskId}`);
   }, [router]);
 
+  const handleSignOut = useCallback(async () => {
+    try {
+      await signOutUser();
+    } catch (signOutError) {
+      console.error('Failed to sign out:', signOutError);
+    }
+  }, [signOutUser]);
+
   const emptyState = useMemo(
     () => (
       <EmptyState
@@ -132,21 +144,42 @@ export default function TaskListScreen() {
         <View style={styles.header}>
           <View style={styles.headerText}>
             <Text style={[styles.title, { color: palette.text }]}>Tasks</Text>
+            {user?.email ? (
+              <Text style={[styles.subtitle, { color: palette.textMuted }]} numberOfLines={1}>
+                {user.email}
+              </Text>
+            ) : null}
           </View>
-          <Pressable
-            onPress={handleOpenComposer}
-            accessibilityRole="button"
-            accessibilityLabel="Create a new task"
-            hitSlop={8}
-            style={({ pressed }) => [
-              styles.headerAction,
-              {
-                opacity: pressed ? 0.6 : 1,
-              },
-            ]}
-          >
-            <MaterialCommunityIcons name="plus" size={28} color={palette.primary} />
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={handleSignOut}
+              accessibilityRole="button"
+              accessibilityLabel="Sign out"
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.headerAction,
+                {
+                  opacity: pressed ? 0.6 : 1,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons name="logout" size={24} color={palette.text} />
+            </Pressable>
+            <Pressable
+              onPress={handleOpenComposer}
+              accessibilityRole="button"
+              accessibilityLabel="Create a new task"
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.headerAction,
+                {
+                  opacity: pressed ? 0.6 : 1,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons name="plus" size={28} color={palette.primary} />
+            </Pressable>
+          </View>
         </View>
 
         {error ? (
@@ -228,6 +261,26 @@ export default function TaskListScreen() {
   );
 }
 
+export default function TaskListScreen() {
+  const { user, initializing } = useAuth();
+  const { theme } = useTheme();
+  const palette = Colors[theme];
+
+  if (initializing) {
+    return (
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+        <LoadingIndicator fullScreen />
+      </SafeAreaView>
+    );
+  }
+
+  if (!user) {
+    return <AuthGate />;
+  }
+
+  return <TaskListContent />;
+}
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -250,6 +303,12 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flexShrink: 1,
+    gap: 4,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   headerAction: {
     padding: 8,
@@ -258,6 +317,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
+  },
+  subtitle: {
+    fontSize: 12,
+    fontWeight: '500',
   },
   errorBanner: {
     borderWidth: 1,
