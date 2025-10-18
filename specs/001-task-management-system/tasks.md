@@ -222,6 +222,10 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
+- [X] T116 [P] Introduce ResponsiveContainer to provide centered, responsive layout (`components/common/ResponsiveContainer.tsx`)
+- [X] T117 [P] Update task list and composer screens for desktop-friendly grid and spacing (`components/task/TaskList.tsx`, `app/index.tsx`)
+- [X] T118 [P] Refine task detail screen responsiveness (`app/task/[id].tsx`, `components/task/TaskDetailCard.tsx`)
+- [X] T119 [P] Refresh global color palette for improved contrast (`constants/Colors.ts`)
 - [ ] T102 [P] Create README.md with project description, setup instructions, and deployment guide
 - [ ] T103 [P] Add error boundary component in `app/_layout.tsx` for graceful error handling
 - [ ] T104 [P] Implement retry logic for failed Firestore operations in taskService
@@ -358,8 +362,8 @@ Stories integrate at checkpoints without blocking each other.
 
 ## Task Summary
 
-- **Total Tasks**: 112
-- **Completed Tasks**: 58 (52%)
+- **Total Tasks**: 116
+- **Completed Tasks**: 62 (53%)
 - **Remaining Tasks**: 54
 
 | Phase | Total | Done | Remaining | Notes |
@@ -372,7 +376,7 @@ Stories integrate at checkpoints without blocking each other.
 | User Story 3 (Animations) | 11 | 0 | 11 | Not started |
 | User Story 4 (Themes) | 11 | 0 | 11 | Not started |
 | User Story 5 (Notifications) | 15 | 3 | 12 | Pending notification scheduling |
-| Polish | 14 | 0 | 14 | Not started |
+| Polish | 18 | 4 | 14 | In progress |
 
 ### Phase Breakdown
 
@@ -384,7 +388,7 @@ Stories integrate at checkpoints without blocking each other.
 - **User Story 3 (P2 - Animations)**: 11 tasks
 - **User Story 4 (P3 - Themes)**: 11 tasks
 - **User Story 5 (P3 - Notifications)**: 15 tasks
-- **Polish Phase**: 14 tasks
+- **Polish Phase**: 18 tasks
 
 **MVP Scope** (Recommended first delivery):
 

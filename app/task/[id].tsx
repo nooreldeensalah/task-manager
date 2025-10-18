@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import EmptyState from '@/components/common/EmptyState';
 import LoadingIndicator from '@/components/common/LoadingIndicator';
+import ResponsiveContainer from '@/components/common/ResponsiveContainer';
 import TaskDetailCard from '@/components/task/TaskDetailCard';
 import Colors from '@/constants/Colors';
 import { useTasks } from '@/hooks/useTasks';
@@ -170,7 +171,7 @@ export default function TaskDetailScreen() {
         }}
       />
       <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-        <View style={[styles.container, { backgroundColor: palette.background }]}>
+        <ResponsiveContainer outerStyle={styles.mainOuter} style={styles.mainContent}>
           {!task && loading ? (
             <LoadingIndicator fullScreen />
           ) : null}
@@ -204,7 +205,7 @@ export default function TaskDetailScreen() {
               updatingStatus={updatingStatus}
             />
           ) : null}
-        </View>
+        </ResponsiveContainer>
       </SafeAreaView>
     </>
   );
@@ -214,14 +215,20 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  container: {
+  mainOuter: {
     flex: 1,
-    padding: 16,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  mainContent: {
+    flex: 1,
+    width: '100%',
     gap: 24,
   },
   emptyStateContainer: {
     flex: 1,
     justifyContent: 'center',
     gap: 16,
+    alignItems: 'center',
   },
 });

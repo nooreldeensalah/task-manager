@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 
 import Button from '@/components/common/Button';
 import DueDateField from '@/components/common/DueDateField';
@@ -50,6 +50,8 @@ export const TaskDetailCard = ({
 }: TaskDetailCardProps) => {
   const { theme } = useTheme();
   const palette = Colors[theme];
+  const { width } = useWindowDimensions();
+  const isWideLayout = width >= 768;
 
   const createdAtLabel = useMemo(
     () => formatDateTime(task.createdAt, { dateStyle: 'medium', timeStyle: 'short' }),
@@ -82,7 +84,12 @@ export const TaskDetailCard = ({
   }, [task.dueDate]);
 
   return (
-    <View style={[styles.card, { backgroundColor: palette.surfaceElevated, borderColor: palette.border }]}
+    <View
+      style={[
+        styles.card,
+        isWideLayout ? styles.cardWide : null,
+        { backgroundColor: palette.surfaceElevated, borderColor: palette.border },
+      ]}
       accessibilityLabel="Task details card">
       <View style={styles.headerRow}>
         <View style={styles.titleSection}>
@@ -181,7 +188,7 @@ export const TaskDetailCard = ({
         )}
       </View>
 
-      <View style={styles.metaSection}>
+      <View style={[styles.metaSection, isWideLayout ? styles.metaSectionWide : null]}>
         <Text style={[styles.metaText, { color: palette.textMuted }]}>Created {createdAtLabel}</Text>
         <Text style={[styles.metaText, { color: palette.textMuted }]}>Updated {updatedAtLabel}</Text>
         {completedAtLabel ? (
@@ -221,6 +228,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 20,
     gap: 24,
+    width: '100%',
+  },
+  cardWide: {
+    padding: 28,
   },
   headerRow: {
     flexDirection: 'row',
@@ -278,6 +289,11 @@ const styles = StyleSheet.create({
   },
   metaSection: {
     gap: 6,
+  },
+  metaSectionWide: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
   },
   metaText: {
     fontSize: 14,

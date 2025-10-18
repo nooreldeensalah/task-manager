@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Button from '@/components/common/Button';
 import EmptyState from '@/components/common/EmptyState';
+import ResponsiveContainer from '@/components/common/ResponsiveContainer';
 import TaskInput from '@/components/task/TaskInput';
 import TaskList from '@/components/task/TaskList';
 import Colors from '@/constants/Colors';
@@ -127,7 +128,7 @@ export default function TaskListScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
-      <View style={[styles.container, { backgroundColor: palette.background }]}>
+      <ResponsiveContainer outerStyle={styles.mainOuter} style={styles.mainContent}>
         <View style={styles.header}>
           <View style={styles.headerText}>
             <Text style={[styles.title, { color: palette.text }]}>Tasks</Text>
@@ -176,7 +177,7 @@ export default function TaskListScreen() {
             loading={loading && !refreshing}
           />
         </View>
-      </View>
+      </ResponsiveContainer>
 
       <Modal
         visible={composerVisible}
@@ -212,11 +213,13 @@ export default function TaskListScreen() {
               keyboardShouldPersistTaps="handled"
               alwaysBounceVertical={false}
             >
-              <View
-                style={[styles.modalCard, { backgroundColor: palette.surfaceElevated, borderColor: palette.border }]}
-              >
-                <TaskInput onSubmit={handleCreateTask} loading={creating} />
-              </View>
+              <ResponsiveContainer outerStyle={styles.modalOuter} style={styles.modalContent}>
+                <View
+                  style={[styles.modalCard, { backgroundColor: palette.surfaceElevated, borderColor: palette.border }]}
+                >
+                  <TaskInput onSubmit={handleCreateTask} loading={creating} />
+                </View>
+              </ResponsiveContainer>
             </ScrollView>
           </KeyboardAvoidingView>
         </SafeAreaView>
@@ -229,13 +232,17 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  container: {
+  mainOuter: {
     flex: 1,
-    paddingBottom: 0,
+    paddingTop: 16,
+    paddingBottom: 24,
+  },
+  mainContent: {
+    flex: 1,
+    gap: 20,
   },
   header: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -298,8 +305,14 @@ const styles = StyleSheet.create({
   },
   modalScrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 16,
     paddingBottom: 24,
+  },
+  modalOuter: {
+    paddingVertical: 16,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 560,
   },
   modalCard: {
     borderRadius: 16,
