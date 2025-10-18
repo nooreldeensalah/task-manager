@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AuthProvider } from '@/contexts/AuthContext';
 import { TaskProvider } from '@/contexts/TaskContext';
 import { ThemeProvider as AppThemeProvider } from '@/contexts/ThemeContext';
 import { useTheme } from '@/hooks/useTheme';
@@ -46,13 +47,15 @@ export default function RootLayout() {
   }
 
   return (
-    <AppThemeProvider>
-      <TaskProvider>
-        <SafeAreaProvider>
-          <RootLayoutNav />
-        </SafeAreaProvider>
-      </TaskProvider>
-    </AppThemeProvider>
+    <AuthProvider>
+      <AppThemeProvider>
+        <TaskProvider>
+          <SafeAreaProvider>
+            <RootLayoutNav />
+          </SafeAreaProvider>
+        </TaskProvider>
+      </AppThemeProvider>
+    </AuthProvider>
   );
 }
 

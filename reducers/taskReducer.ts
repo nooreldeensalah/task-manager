@@ -55,6 +55,12 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
         ...state,
         error: action.payload,
       };
+    case 'RESET':
+      return {
+        tasks: [],
+        loading: false,
+        error: null,
+      };
     default: {
       const exhaustiveCheck: never = action;
       return state;

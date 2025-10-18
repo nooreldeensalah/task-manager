@@ -1,5 +1,6 @@
-import { createContext, useMemo, useReducer, type Dispatch, type ReactNode } from 'react';
+import { createContext, useEffect, useMemo, useReducer, type Dispatch, type ReactNode } from 'react';
 
+import { useAuth } from '@/hooks/useAuth';
 import { initialTaskState, taskReducer } from '@/reducers/taskReducer';
 import type { TaskAction } from '@/types/actions';
 import type { TaskState } from '@/types/task';
@@ -17,6 +18,11 @@ interface TaskProviderProps {
 
 export const TaskProvider = ({ children }: TaskProviderProps) => {
   const [state, dispatch] = useReducer(taskReducer, initialTaskState);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    dispatch({ type: 'RESET' });
+  }, [user?.uid]);
 
   const value = useMemo(
     () => ({

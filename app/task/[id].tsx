@@ -3,16 +3,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import AuthGate from '@/components/auth/AuthGate';
 import EmptyState from '@/components/common/EmptyState';
 import LoadingIndicator from '@/components/common/LoadingIndicator';
 import ResponsiveContainer from '@/components/common/ResponsiveContainer';
 import TaskDetailCard from '@/components/task/TaskDetailCard';
 import Colors from '@/constants/Colors';
+import { useAuth } from '@/hooks/useAuth';
 import { useTasks } from '@/hooks/useTasks';
 import { useTheme } from '@/hooks/useTheme';
 import { validateTaskDescription, validateTaskTitle } from '@/utils/validation';
 
-export default function TaskDetailScreen() {
+function TaskDetailContent() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { theme } = useTheme();
   const palette = Colors[theme];
@@ -209,6 +211,26 @@ export default function TaskDetailScreen() {
       </SafeAreaView>
     </>
   );
+}
+
+export default function TaskDetailScreen() {
+  const { user, initializing } = useAuth();
+  const { theme } = useTheme();
+  const palette = Colors[theme];
+
+  if (initializing) {
+    return (
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+        <LoadingIndicator fullScreen />
+      </SafeAreaView>
+    );
+  }
+
+  if (!user) {
+    return <AuthGate />;
+  }
+
+  return <TaskDetailContent />;
 }
 
 const styles = StyleSheet.create({
