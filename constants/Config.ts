@@ -8,6 +8,6 @@ export const FIRESTORE_COLLECTIONS = {
 } as const;
 
 export const STORAGE_KEYS = {
-  THEME_PREFERENCE: '@c1-task-manager/theme-preference',
-  USER_PREFERENCES: '@c1-task-manager/preferences',
+  THEME_PREFERENCE: '@c1-tm/theme-preference',
+  USER_PREFERENCES: '@c1-tm/preferences',
 } as const;
