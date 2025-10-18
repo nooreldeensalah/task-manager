@@ -28,7 +28,8 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "baseUrl": "/c1-task-manager/"
     },
     "plugins": ["expo-router", "expo-notifications"],
     "experiments": {

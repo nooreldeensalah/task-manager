@@ -56,11 +56,9 @@
 - [X] T016 Implement taskReducer in `reducers/taskReducer.ts` with actions: SET_TASKS, ADD_TASK, UPDATE_TASK, DELETE_TASK, SET_LOADING, SET_ERROR
 - [X] T017 Create TaskContext with useReducer in `contexts/TaskContext.tsx`
 - [X] T018 [P] Create ThemeContext with light/dark theme support in `contexts/ThemeContext.tsx`
-- [X] T019 Initialize Firestore with offline persistence in `services/firestore.ts`
 - [X] T020 Implement taskService with CRUD operations in `services/taskService.ts` (createTask, updateTask, deleteTask, fetchTasks, subscribeToTasks)
 - [X] T021 [P] Create useTasks custom hook in `hooks/useTasks.ts` to access TaskContext
 - [X] T022 [P] Create useTheme custom hook in `hooks/useTheme.ts` to access ThemeContext
-- [ ] T023 [P] Create useOfflineStatus hook in `hooks/useOfflineStatus.ts` using NetInfo _(Deprecated for online-first scope)_
 - [X] T024 [P] Define app constants in `constants/Config.ts` (character limits, etc.)
 - [X] T025 [P] Define color schemes in `constants/Colors.ts` (light and dark themes)
 - [X] T026 [P] Create validation utilities in `utils/validation.ts` (validateTaskDescription, characterLimit)
@@ -92,8 +90,6 @@
 - [x] T039 [US1] Add task creation logic with validation in `app/(tabs)/index.tsx`
 - [x] T040 [US1] Add task completion toggle logic in TaskItem component
 - [x] T041 [US1] Add delete confirmation dialog trigger in TaskItem component
-- [ ] T042 [US1] Implement offline queue mechanism in taskService.ts for Firestore writes _(Deferred for online-first scope)_
-- [ ] T043 [US1] Add offline status indicator to main screen header _(Deferred for online-first scope)_
 - [ ] T044 [US1] Test task persistence: create, complete, delete, restart app
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently (MVP complete!)
@@ -108,13 +104,13 @@
 
 ### Implementation for User Story 6
 
-- [ ] T045 [P] [US6] Configure `app.json` with web-specific settings and baseUrl for GitHub Pages
-- [ ] T046 [P] [US6] Create responsive web styles in `constants/Layout.ts`
-- [ ] T047 [US6] Test web build locally with `npx expo export -p web`
-- [ ] T048 [US6] Create GitHub Actions workflow in `.github/workflows/deploy-web.yml`
-- [ ] T049 [US6] Configure workflow to build Expo web on push to main branch
-- [ ] T050 [US6] Configure workflow to deploy `dist/` directory to gh-pages branch using peaceiris/actions-gh-pages@v3
-- [ ] T051 [US6] Create `404.html` redirect for client-side routing in web build
+- [x] T045 [P] [US6] Configure `app.json` with web-specific settings and baseUrl for GitHub Pages
+- [x] T046 [P] [US6] Create responsive web styles in `constants/Layout.ts`
+- [x] T047 [US6] Test web build locally with `npx expo export -p web`
+- [x] T048 [US6] Create GitHub Actions workflow in `.github/workflows/deploy-web.yml`
+- [x] T049 [US6] Configure workflow to build Expo web on push to main branch
+- [x] T050 [US6] Configure workflow to deploy `dist/` directory to gh-pages branch using peaceiris/actions-gh-pages@v3
+- [x] T051 [US6] Create `404.html` redirect for client-side routing in web build
 - [ ] T052 [US6] Enable GitHub Pages in repository settings
 - [ ] T053 [US6] Add build failure notifications in workflow (GitHub Actions status checks)
 - [ ] T054 [US6] Test CI/CD: commit change, verify automatic build and deployment
@@ -362,10 +358,27 @@ Stories integrate at checkpoints without blocking each other.
 
 ## Task Summary
 
-- **Total Tasks**: 115
+- **Total Tasks**: 112
+- **Completed Tasks**: 58 (52%)
+- **Remaining Tasks**: 54
+
+| Phase | Total | Done | Remaining | Notes |
+| --- | --- | --- | --- | --- |
+| Setup | 12 | 12 | 0 | Complete |
+| Foundational | 14 | 14 | 0 | Complete |
+| User Story 1 (MVP) | 15 | 14 | 1 | Pending T044 validation |
+| User Story 6 (Deployment) | 11 | 7 | 4 | In progress |
+| User Story 2 (Details) | 9 | 8 | 1 | Pending T064 testing |
+| User Story 3 (Animations) | 11 | 0 | 11 | Not started |
+| User Story 4 (Themes) | 11 | 0 | 11 | Not started |
+| User Story 5 (Notifications) | 15 | 3 | 12 | Pending notification scheduling |
+| Polish | 14 | 0 | 14 | Not started |
+
+### Phase Breakdown
+
 - **Setup Phase**: 12 tasks
-- **Foundational Phase**: 15 tasks (BLOCKING)
-- **User Story 1 (P1 - MVP)**: 17 tasks
+- **Foundational Phase**: 14 tasks (BLOCKING)
+- **User Story 1 (P1 - MVP)**: 15 tasks
 - **User Story 6 (P1 - Deployment)**: 11 tasks
 - **User Story 2 (P2 - Details)**: 9 tasks
 - **User Story 3 (P2 - Animations)**: 11 tasks
@@ -377,8 +390,8 @@ Stories integrate at checkpoints without blocking each other.
 
 - Phase 1: Setup (12 tasks)
 - Phase 2: Foundational (15 tasks)
-- Phase 3: User Story 1 (17 tasks)
+- Phase 3: User Story 1 (15 tasks)
 - Phase 4: User Story 6 (11 tasks)
-- **Total MVP**: 55 tasks
+- **Total MVP**: 52 tasks
 
 **Parallel Opportunities**: 40+ tasks marked with [P] can run in parallel, significantly reducing total development time with proper team coordination.
