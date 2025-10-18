@@ -3,6 +3,7 @@ import type { PressableProps } from 'react-native';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import Colors, { type ThemePalette } from '@/constants/Colors';
+import { RADIUS, SPACING, TYPOGRAPHY } from '@/constants/Layout';
 import { useTheme } from '@/hooks/useTheme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
@@ -108,9 +109,9 @@ export const Button = ({
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    borderRadius: RADIUS.md,
+    paddingVertical: SPACING.smPlus,
+    paddingHorizontal: SPACING.md,
     borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'center',
@@ -119,14 +120,13 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: SPACING.sm,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
+    ...TYPOGRAPHY.subtitle,
   },
   icon: {
-    marginRight: 4,
+    marginRight: SPACING.xs,
   },
 });
 

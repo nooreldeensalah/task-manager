@@ -7,7 +7,6 @@ export interface ThemePalette {
   text: string;
   textMuted: string;
   border: string;
-  accent: string;
   success: string;
   warning: string;
   danger: string;
@@ -18,7 +17,6 @@ export interface ThemePalette {
 
 const BASE_COLORS = {
   primary: '#7c3aed', // Vibrant violet for brand-forward actions
-  accent: '#f97316', // Warm accent for highlights
   success: '#22c55e',
   warning: '#facc15',
   danger: '#ef4444',
@@ -33,7 +31,6 @@ export const LIGHT_THEME_COLORS: ThemePalette = {
   text: '#111827',
   textMuted: '#6b7280',
   border: '#d6d8eb',
-  accent: BASE_COLORS.accent,
   success: BASE_COLORS.success,
   warning: BASE_COLORS.warning,
   danger: BASE_COLORS.danger,
@@ -51,7 +48,6 @@ export const DARK_THEME_COLORS: ThemePalette = {
   text: '#f3f4f6',
   textMuted: '#9ca3af',
   border: '#30374a',
-  accent: BASE_COLORS.accent,
   success: BASE_COLORS.success,
   warning: BASE_COLORS.warning,
   danger: BASE_COLORS.danger,

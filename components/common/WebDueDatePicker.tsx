@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import Button from '@/components/common/Button';
 import Colors from '@/constants/Colors';
+import { RADIUS, SPACING, TYPOGRAPHY } from '@/constants/Layout';
 import { useTheme } from '@/hooks/useTheme';
 import { formatDateTimeLocalInput, roundToMinute } from '@/utils/formatting';
 
@@ -19,6 +20,7 @@ export const WebDueDatePicker = ({ visible, onClose, onSave, initialDate, minimu
   const palette = Colors[theme];
   const [dateTimeInput, setDateTimeInput] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [focused, setFocused] = useState(false);
 
   const roundedMinimum = useMemo(() => roundToMinute(minimumDate), [minimumDate]);
   const minValue = useMemo(() => formatDateTimeLocalInput(roundedMinimum), [roundedMinimum]);
@@ -76,28 +78,51 @@ export const WebDueDatePicker = ({ visible, onClose, onSave, initialDate, minimu
           <Text style={[styles.title, { color: palette.text }]}>Choose a due date</Text>
           <Text style={[styles.subtitle, { color: palette.textMuted }]}>Pick the exact minute you want to finish.</Text>
 
-          <label style={{ width: '100%' }}>
-            <Text style={[styles.inputLabel, { color: palette.text }]}>Date &amp; time</Text>
-            <input
-              type="datetime-local"
-              value={dateTimeInput}
-              min={minValue}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setDateTimeInput(event.target.value);
-                setError(null);
-              }}
+          <View style={styles.inputGroup}>
+            <label
               style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: SPACING.xs,
                 width: '100%',
-                borderRadius: 12,
-                border: `1px solid ${palette.border}`,
-                padding: '12px 14px',
-                fontSize: 16,
-                color: palette.text,
-                backgroundColor: palette.surface,
-                marginTop: 6,
-              }}
-            />
-          </label>
+              }}>
+              <Text style={[styles.inputLabel, { color: palette.text }]}>Date &amp; time</Text>
+              <View
+                style={{
+                  borderRadius: RADIUS.md,
+                  borderWidth: 1,
+                  paddingHorizontal: SPACING.md,
+                  paddingVertical: SPACING.md,
+                  borderColor: focused ? palette.primary : palette.border,
+                  backgroundColor: focused ? palette.surfaceElevated : palette.surface,
+                }}>
+                <input
+                  type="datetime-local"
+                  value={dateTimeInput}
+                  min={minValue}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setDateTimeInput(event.target.value);
+                    setError(null);
+                  }}
+                  onFocus={() => setFocused(true)}
+                  onBlur={() => setFocused(false)}
+                  style={{
+                    width: '100%',
+                    border: 'none',
+                    backgroundColor: 'transparent',
+                    padding: 0,
+                    margin: 0,
+                    boxSizing: 'border-box',
+                    fontSize: TYPOGRAPHY.body.fontSize,
+                    lineHeight: `${TYPOGRAPHY.body.lineHeight}px`,
+                    color: palette.text,
+                    outline: 'none',
+                    colorScheme: theme === 'dark' ? 'dark' : 'light',
+                  }}
+                />
+              </View>
+            </label>
+          </View>
 
           {error ? (
             <Text style={[styles.error, { color: palette.danger }]} accessibilityLiveRegion="polite">
@@ -121,38 +146,40 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.35)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+    padding: SPACING.lg,
   },
   card: {
     width: '100%',
     maxWidth: 420,
-    borderRadius: 20,
+    borderRadius: RADIUS.xl,
     borderWidth: 1,
-    padding: 20,
-    gap: 16,
+    padding: SPACING.lg,
+    gap: SPACING.md,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
+    ...TYPOGRAPHY.titleMd,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 14,
+    ...TYPOGRAPHY.bodySmall,
     textAlign: 'center',
   },
   inputLabel: {
-    fontSize: 14,
+    ...TYPOGRAPHY.caption,
     fontWeight: '600',
   },
   error: {
-    fontSize: 13,
+    ...TYPOGRAPHY.caption,
     textAlign: 'center',
+  },
+  inputGroup: {
+    width: '100%',
   },
   actionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 12,
+    gap: SPACING.sm,
     flexWrap: 'wrap',
   },
 });

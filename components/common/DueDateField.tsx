@@ -14,6 +14,7 @@ import {
 
 import WebDueDatePicker from '@/components/common/WebDueDatePicker';
 import Colors from '@/constants/Colors';
+import { RADIUS, SPACING, TYPOGRAPHY } from '@/constants/Layout';
 import { useTheme } from '@/hooks/useTheme';
 import { formatDateTime, roundToMinute } from '@/utils/formatting';
 
@@ -37,6 +38,10 @@ const getDisplayOptions = (mode: DueDatePickerMode) => {
       return { dateStyle: 'medium' as const };
   }
 };
+
+const SELECTOR_HORIZONTAL_PADDING = SPACING.md - SPACING.xs;
+const SELECTOR_VERTICAL_PADDING = SPACING.sm + SPACING.xxs;
+const CLEAR_BUTTON_HORIZONTAL_PADDING = SPACING.sm + SPACING.xxs;
 
 export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'datetime' }: DueDateFieldProps) => {
   const { theme } = useTheme();
@@ -231,61 +236,61 @@ export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'date
 
 const styles = StyleSheet.create({
   container: {
-    gap: 8,
+    gap: SPACING.sm,
   },
   label: {
-    fontSize: 14,
+    ...TYPOGRAPHY.bodySmall,
     fontWeight: '600',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: SPACING.smPlus,
   },
   selector: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 12,
+    gap: SPACING.sm + SPACING.xxs,
+    paddingVertical: SELECTOR_VERTICAL_PADDING,
+    paddingHorizontal: SELECTOR_HORIZONTAL_PADDING,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
   },
   selectorText: {
-    fontSize: 15,
+    ...TYPOGRAPHY.body,
     fontWeight: '600',
   },
   clearButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
+    gap: SPACING.xs + SPACING.xxs,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: CLEAR_BUTTON_HORIZONTAL_PADDING,
+    borderRadius: RADIUS.md,
   },
   clearText: {
-    fontSize: 13,
+    ...TYPOGRAPHY.bodySmall,
     fontWeight: '600',
   },
   errorText: {
-    fontSize: 13,
+    ...TYPOGRAPHY.bodySmall,
   },
   iosPickerContainer: {
-    borderRadius: 16,
-    marginTop: 12,
+    borderRadius: RADIUS.lg,
+    marginTop: SPACING.smPlus,
     overflow: 'hidden',
   },
   iosPickerActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.smPlus,
   },
   doneButton: {
-    padding: 4,
+    padding: SPACING.xs,
   },
   doneText: {
-    fontSize: 15,
+    ...TYPOGRAPHY.body,
     fontWeight: '600',
   },
 });

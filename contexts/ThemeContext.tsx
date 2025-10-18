@@ -16,6 +16,7 @@ interface ThemeContextValue {
   theme: ThemeName;
   preference: ThemePreference;
   setPreference: (preference: ThemePreference) => void;
+  toggleTheme: () => void;
 }
 
 const getSystemTheme = (): ThemeName => (Appearance.getColorScheme() ?? 'light') as ThemeName;
@@ -27,7 +28,7 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-  const [preference, setPreference] = useState<ThemePreference>('system');
+  const [preference, setPreferenceState] = useState<ThemePreference>('system');
   const [systemTheme, setSystemTheme] = useState<ColorSchemeName>(Appearance.getColorScheme());
 
   useEffect(() => {
@@ -47,7 +48,17 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   }, [preference, systemTheme]);
 
   const handleSetPreference = useCallback((nextPreference: ThemePreference) => {
-    setPreference(nextPreference);
+    setPreferenceState(nextPreference);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setPreferenceState((currentPreference) => {
+      const activeTheme: ThemeName = currentPreference === 'system'
+        ? getSystemTheme()
+        : currentPreference;
+
+      return activeTheme === 'dark' ? 'light' : 'dark';
+    });
   }, []);
 
   const value = useMemo(
@@ -55,8 +66,9 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
       theme: resolvedTheme,
       preference,
       setPreference: handleSetPreference,
+      toggleTheme,
     }),
-    [resolvedTheme, preference, handleSetPreference],
+    [resolvedTheme, preference, handleSetPreference, toggleTheme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

@@ -53,13 +53,14 @@ export const TaskList = ({
       }
       accessibilityLabel="Task list">
       <View style={[styles.list, isWideDesktop ? styles.listDesktop : null]}>
-        {tasks.map((task) => (
+        {tasks.map((task, index) => (
           <View key={task.id} style={isWideDesktop ? styles.desktopItemWrapper : styles.itemWrapper}>
             <TaskItem
               task={task}
               onToggle={onToggleTask}
               onDelete={onDeleteTask}
               onPress={onTaskPress}
+              appearanceDelay={index * 40}
             />
           </View>
         ))}
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    paddingTop: 12,
+    paddingTop: SPACING.md,
   },
   list: {
     flexGrow: 1,
@@ -104,11 +105,11 @@ const styles = StyleSheet.create({
     minWidth: 300,
   },
   loadingContainer: {
-    marginTop: 24,
+    marginTop: SPACING.lg,
     alignItems: 'center',
   },
   emptyState: {
-    marginTop: 32,
+    marginTop: SPACING.xl,
   },
   emptyStateDesktop: {
     alignSelf: 'center',

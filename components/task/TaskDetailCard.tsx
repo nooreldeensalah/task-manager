@@ -7,6 +7,7 @@ import DueDateField from '@/components/common/DueDateField';
 import Input from '@/components/common/Input';
 import Colors from '@/constants/Colors';
 import { TASK_DESCRIPTION_MAX_LENGTH, TASK_TITLE_MAX_LENGTH } from '@/constants/Config';
+import { BREAKPOINTS, RADIUS, SPACING, TYPOGRAPHY } from '@/constants/Layout';
 import { useTheme } from '@/hooks/useTheme';
 import type { Task } from '@/types/task';
 import { formatDateTime, formatRelativeTime } from '@/utils/formatting';
@@ -51,7 +52,7 @@ export const TaskDetailCard = ({
   const { theme } = useTheme();
   const palette = Colors[theme];
   const { width } = useWindowDimensions();
-  const isWideLayout = width >= 768;
+  const isWideLayout = width >= BREAKPOINTS.tablet;
 
   const createdAtLabel = useMemo(
     () => formatDateTime(task.createdAt, { dateStyle: 'medium', timeStyle: 'short' }),
@@ -83,6 +84,22 @@ export const TaskDetailCard = ({
     return `${absolute}${relative ? ` (${relative})` : ''}`;
   }, [task.dueDate]);
 
+  const metaItems = useMemo(
+    () =>
+      [
+        { label: 'Created', value: createdAtLabel },
+        { label: 'Updated', value: updatedAtLabel },
+        task.completed ? { label: 'Completed', value: completedAtLabel } : null,
+        dueDateLabel ? { label: 'Due', value: dueDateLabel } : null,
+      ].filter((item): item is { label: string; value: string } => Boolean(item?.value)),
+    [completedAtLabel, createdAtLabel, dueDateLabel, task.completed, updatedAtLabel],
+  );
+
+  const completionIconName = task.completed ? 'check-circle-outline' : 'check-circle';
+  const completionBackground = task.completed ? palette.surface : palette.primary;
+  const completionIconColor = task.completed ? palette.primary : palette.background;
+  const completionBorderColor = task.completed ? palette.primary : 'transparent';
+
   return (
     <View
       style={[
@@ -93,11 +110,13 @@ export const TaskDetailCard = ({
       accessibilityLabel="Task details card">
       <View style={styles.headerRow}>
         <View style={styles.titleSection}>
-          <Text style={[styles.primaryTitle, { color: task.completed ? palette.textMuted : palette.text }]} accessibilityLabel="Task title">
+          <Text
+            style={[styles.primaryTitle, { color: task.completed ? palette.textMuted : palette.text }]}
+            accessibilityLabel="Task title">
             {task.title}
           </Text>
           {task.completed && (
-            <View style={styles.completedBadge}>
+            <View style={[styles.completedBadge, { borderColor: palette.success, backgroundColor: palette.surface }]}>
               <MaterialCommunityIcons name="check-circle" size={16} color={palette.success} />
               <Text style={[styles.completedText, { color: palette.success }]}>Completed</Text>
             </View>
@@ -112,11 +131,10 @@ export const TaskDetailCard = ({
                 {
                   backgroundColor: pressed ? palette.surface : 'transparent',
                   borderColor: palette.border,
-                }
+                },
               ]}
               accessibilityLabel="Edit task"
-              accessibilityRole="button"
-            >
+              accessibilityRole="button">
               <MaterialCommunityIcons name="pencil" size={20} color={palette.text} />
             </Pressable>
           )}
@@ -126,23 +144,16 @@ export const TaskDetailCard = ({
             style={({ pressed }) => [
               styles.iconButton,
               {
-                backgroundColor: task.completed
-                  ? (pressed ? palette.surface : palette.surfaceElevated)
-                  : (pressed ? palette.primaryMuted : palette.primary),
-                borderColor: task.completed ? palette.border : 'transparent',
-              }
+                backgroundColor: pressed ? palette.primaryMuted : completionBackground,
+                borderColor: completionBorderColor,
+              },
             ]}
-            accessibilityLabel={task.completed ? "Mark incomplete" : "Mark complete"}
-            accessibilityRole="button"
-          >
+            accessibilityLabel={task.completed ? 'Mark incomplete' : 'Mark complete'}
+            accessibilityRole="button">
             {updatingStatus ? (
-              <ActivityIndicator size="small" color={task.completed ? palette.text : palette.background} />
+              <ActivityIndicator size="small" color={completionIconColor} />
             ) : (
-              <MaterialCommunityIcons
-                name={task.completed ? 'check-circle-outline' : 'check-circle'}
-                size={20}
-                color={task.completed ? palette.text : palette.background}
-              />
+              <MaterialCommunityIcons name={completionIconName} size={20} color={completionIconColor} />
             )}
           </Pressable>
         </View>
@@ -172,135 +183,149 @@ export const TaskDetailCard = ({
               accessibilityLabel="Edit task description"
               textAlignVertical="top"
               placeholder="Add more context (optional)"
-              helperText="Optional — leave blank if not needed"
-              style={styles.input}
+              helperText="Optional - leave blank if not needed"
+              style={styles.descriptionInput}
             />
             <DueDateField value={dueDateDraft} onChange={onChangeDueDate} label="Due date (optional)" mode="datetime" />
           </>
         ) : (
           <View style={styles.summarySection}>
-            <Text
-              style={[styles.descriptionText, { color: palette.textMuted }]}
-              accessibilityLabel="Task description">
+            <Text style={[styles.descriptionText, { color: palette.textMuted }]} accessibilityLabel="Task description">
               {task.description || 'No additional details yet.'}
             </Text>
           </View>
         )}
       </View>
 
-      <View style={[styles.metaSection, isWideLayout ? styles.metaSectionWide : null]}>
-        <Text style={[styles.metaText, { color: palette.textMuted }]}>Created {createdAtLabel}</Text>
-        <Text style={[styles.metaText, { color: palette.textMuted }]}>Updated {updatedAtLabel}</Text>
-        {completedAtLabel ? (
-          <Text style={[styles.metaText, { color: palette.textMuted }]}>Completed {completedAtLabel}</Text>
-        ) : null}
-        {dueDateLabel ? (
-          <Text style={[styles.metaText, { color: palette.textMuted }]}>Due {dueDateLabel}</Text>
-        ) : null}
-      </View>
+      {metaItems.length > 0 && (
+        <View style={[styles.metaSection, isWideLayout ? styles.metaSectionWide : null]}>
+          {metaItems.map((item) => (
+            <View key={item.label} style={[styles.metaItem, isWideLayout ? styles.metaItemWide : null]}>
+              <Text style={[styles.metaLabel, { color: palette.textMuted }]}>{item.label}</Text>
+              <Text style={[styles.metaValue, { color: palette.text }]}>{item.value}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
-      <View style={styles.actionsRow}>
-        {editing ? (
-          <>
-            <Button
-              label="Cancel"
-              variant="ghost"
-              onPress={onCancelEditing}
-              disabled={saving}
-            />
-            <Button
-              label="Save changes"
-              onPress={onSave}
-              loading={saving}
-              disabled={saving}
-              fullWidth
-            />
-          </>
-        ) : null}
-      </View>
+      {editing && (
+        <View style={styles.actionsRow}>
+          <Button
+            label="Cancel"
+            variant="ghost"
+            onPress={onCancelEditing}
+            disabled={saving}
+            style={styles.actionButton}
+          />
+          <Button
+            label="Save changes"
+            onPress={onSave}
+            loading={saving}
+            style={styles.primaryActionButton}
+          />
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 20,
-    gap: 24,
     width: '100%',
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    padding: SPACING.lg,
+    gap: SPACING.lg,
   },
   cardWide: {
-    padding: 28,
+    padding: SPACING.xl,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 16,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  iconButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    minWidth: 40,
-    minHeight: 40,
-    borderRadius: 10,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    gap: SPACING.md,
   },
   titleSection: {
     flex: 1,
-    gap: 8,
+    gap: SPACING.xs,
+    alignItems: 'flex-start',
+  },
+  primaryTitle: {
+    ...TYPOGRAPHY.titleLg,
   },
   completedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    borderWidth: 1,
+    borderRadius: RADIUS.pill,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    gap: SPACING.xs,
   },
   completedText: {
-    fontSize: 14,
+    ...TYPOGRAPHY.caption,
     fontWeight: '600',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  iconButton: {
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    padding: SPACING.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 40,
+    minHeight: 40,
   },
   section: {
-    gap: 12,
+    gap: SPACING.md,
   },
   summarySection: {
-    gap: 8,
-  },
-  primaryTitle: {
-    fontSize: 22,
-    fontWeight: '700',
+    gap: SPACING.sm,
   },
   descriptionText: {
-    fontSize: 16,
-    lineHeight: 24,
+    ...TYPOGRAPHY.body,
   },
-  input: {
+  descriptionInput: {
     minHeight: 120,
   },
   metaSection: {
-    gap: 6,
+    gap: SPACING.sm,
   },
   metaSectionWide: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: SPACING.md,
   },
-  metaText: {
-    fontSize: 14,
-    lineHeight: 20,
+  metaItem: {
+    gap: SPACING.xs,
+  },
+  metaItemWide: {
+    flexBasis: '48%',
+  },
+  metaLabel: {
+    ...TYPOGRAPHY.caption,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontWeight: 'bold',
+  },
+  metaValue: {
+    ...TYPOGRAPHY.bodySmall,
   },
   actionsRow: {
-    gap: 12,
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  actionButton: {
+    borderRadius: RADIUS.lg,
+    paddingHorizontal: SPACING.lg,
+  },
+  primaryActionButton: {
+    borderRadius: RADIUS.lg,
+    paddingHorizontal: SPACING.lg,
   },
 });
 

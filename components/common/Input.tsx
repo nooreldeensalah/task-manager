@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
 
 import Colors from '@/constants/Colors';
+import { RADIUS, SPACING, TYPOGRAPHY } from '@/constants/Layout';
 import { useTheme } from '@/hooks/useTheme';
 
 export interface InputProps extends TextInputProps {
@@ -61,36 +62,36 @@ Input.displayName = 'Input';
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    gap: 4,
+    gap: SPACING.xs,
   },
   label: {
-    fontSize: 14,
+    ...TYPOGRAPHY.bodySmall,
     fontWeight: '600',
   },
   inputWrapper: {
-    borderRadius: 12,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING.md - SPACING.xs,
+    paddingVertical: SPACING.smPlus,
   },
   input: {
-    fontSize: 16,
+    ...TYPOGRAPHY.body,
     padding: 0,
   },
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    minHeight: 18,
+    minHeight: TYPOGRAPHY.caption.lineHeight + SPACING.xxs,
   },
   helperText: {
-    fontSize: 12,
+    ...TYPOGRAPHY.caption,
   },
   errorText: {
-    fontSize: 12,
+    ...TYPOGRAPHY.caption,
   },
   counter: {
-    fontSize: 12,
+    ...TYPOGRAPHY.caption,
   },
 });
 

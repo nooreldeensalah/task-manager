@@ -1,9 +1,10 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import Colors from '@/constants/Colors';
+import { RADIUS, SPACING, TYPOGRAPHY } from '@/constants/Layout';
 import { useTheme } from '@/hooks/useTheme';
 import type { Task, TaskId } from '@/types/task';
 import { formatDateTime, formatRelativeTime } from '@/utils/formatting';
@@ -13,12 +14,17 @@ export interface TaskItemProps {
   onToggle: (taskId: TaskId, completed: boolean) => void;
   onDelete: (taskId: TaskId) => void;
   onPress?: (taskId: TaskId) => void;
+  appearanceDelay?: number;
 }
 
-export const TaskItem = ({ task, onToggle, onDelete, onPress }: TaskItemProps) => {
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+export const TaskItem = ({ task, onToggle, onDelete, onPress, appearanceDelay = 0 }: TaskItemProps) => {
   const { theme } = useTheme();
   const palette = Colors[theme];
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const scale = useRef(new Animated.Value(1)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
   const relativeDate = useMemo(() => {
     const reference = task.completed
@@ -63,73 +69,102 @@ export const TaskItem = ({ task, onToggle, onDelete, onPress }: TaskItemProps) =
     onToggle(task.id, !task.completed);
   }, [onPress, onToggle, task.completed, task.id]);
 
+  useEffect(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 240,
+      delay: appearanceDelay,
+      useNativeDriver: true,
+    }).start();
+  }, [appearanceDelay, opacity]);
+
+  const handlePressIn = useCallback(() => {
+    Animated.spring(scale, {
+      toValue: 0.97,
+      useNativeDriver: true,
+      friction: 6,
+    }).start();
+  }, [scale]);
+
+  const handlePressOut = useCallback(() => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      friction: 6,
+    }).start();
+  }, [scale]);
+
   return (
     <>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityHint={onPress ? 'Open task details' : 'Toggle task completion'}
-        accessibilityState={{ checked: task.completed }}
-        style={[
-          styles.container,
-          {
-            backgroundColor: palette.surfaceElevated,
-            borderColor: palette.border,
-            opacity: task.completed ? 0.65 : 1,
-          },
-        ]}
-        onPress={handlePress}
-        testID={`task-item-${task.id}`}>
-        <Pressable
-          onPress={handleToggle}
-          accessibilityRole="checkbox"
+      <Animated.View style={{ opacity, transform: [{ scale }] }}>
+        <AnimatedPressable
+          accessibilityRole="button"
+          accessibilityHint={onPress ? 'Open task details' : 'Toggle task completion'}
           accessibilityState={{ checked: task.completed }}
           style={[
-            styles.checkbox,
+            styles.container,
             {
-              borderColor: task.completed ? palette.primary : palette.border,
-              backgroundColor: task.completed ? palette.primary : 'transparent',
+              backgroundColor: palette.surfaceElevated,
+              borderColor: palette.border,
+              opacity: task.completed ? 0.65 : 1,
             },
-          ]}>
-          {task.completed && <MaterialCommunityIcons name="check" size={18} color={palette.background} />}
-        </Pressable>
-        <View style={styles.content}>
-          <Text
+          ]}
+          onPress={handlePress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          testID={`task-item-${task.id}`}>
+          <Pressable
+            onPress={handleToggle}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: task.completed }}
             style={[
-              styles.title,
+              styles.checkbox,
               {
-                color: palette.text,
-                textDecorationLine: task.completed ? 'line-through' : 'none',
+                borderColor: task.completed ? palette.primary : palette.border,
+                backgroundColor: task.completed ? palette.primary : 'transparent',
               },
-            ]}
-            numberOfLines={2}
-            accessibilityLabel="Task title">
-            {task.title}
-          </Text>
-          {task.description ? (
+            ]}>
+            {task.completed && <MaterialCommunityIcons name="check" size={18} color={palette.background} />}
+          </Pressable>
+          <View style={styles.content}>
             <Text
-              style={[styles.description, { color: palette.textMuted }]}
+              style={[
+                styles.title,
+                {
+                  color: palette.text,
+                  textDecorationLine: task.completed ? 'line-through' : 'none',
+                },
+              ]}
               numberOfLines={2}
-              accessibilityLabel="Task description">
-              {task.description}
+              accessibilityLabel="Task title">
+              {task.title}
             </Text>
-          ) : null}
-          <View style={styles.metaRow}>
-            <Text style={[styles.meta, { color: palette.textMuted }]}>{relativeDate}</Text>
-            {dueDateLabel ? (
-              <Text style={[styles.due, { color: palette.danger }]} accessibilityLabel="Task due date">
-                Due {dueDateLabel}
+            {task.description ? (
+              <Text
+                style={[styles.description, { color: palette.textMuted }]}
+                numberOfLines={2}
+                accessibilityLabel="Task description">
+                {task.description}
               </Text>
             ) : null}
+            <View style={styles.metaRow}>
+              <Text style={[styles.meta, { color: palette.textMuted }]}>{relativeDate}</Text>
+              {dueDateLabel ? (
+                <Text style={[styles.due, { color: palette.danger }]} accessibilityLabel="Task due date">
+                  Due {dueDateLabel}
+                </Text>
+              ) : null}
+            </View>
           </View>
-        </View>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Delete task"
-          style={styles.deleteButton}
-          onPress={handleDelete}>
-          <MaterialCommunityIcons name="trash-can-outline" size={22} color={palette.danger} />
-        </Pressable>
-      </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Delete task"
+            style={styles.deleteButton}
+            onPress={handleDelete}>
+            <MaterialCommunityIcons name="trash-can-outline" size={22} color={palette.danger} />
+          </Pressable>
+        </AnimatedPressable>
+      </Animated.View>
 
       <ConfirmDialog
         visible={confirmVisible}
@@ -148,47 +183,45 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 16,
+    borderRadius: RADIUS.lg,
     borderWidth: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 14,
-    marginBottom: 12,
-    gap: 12,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
   },
   checkbox: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: RADIUS.pill,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
   content: {
     flex: 1,
-    gap: 6,
+    gap: SPACING.xs,
   },
   title: {
-    fontSize: 16,
-    fontWeight: '600',
+    ...TYPOGRAPHY.subtitle,
   },
   description: {
-    fontSize: 14,
-    lineHeight: 20,
+    ...TYPOGRAPHY.bodySmall,
   },
   meta: {
-    fontSize: 12,
+    ...TYPOGRAPHY.caption,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: SPACING.sm,
   },
   due: {
-    fontSize: 12,
-    fontWeight: '600',
+    ...TYPOGRAPHY.caption,
+    fontWeight: '700',
   },
   deleteButton: {
-    padding: 4,
+    padding: SPACING.xs,
   },
 });
 
