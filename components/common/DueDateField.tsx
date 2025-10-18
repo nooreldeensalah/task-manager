@@ -43,6 +43,7 @@ export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'date
   const palette = Colors[theme];
   const [iosPickerVisible, setIosPickerVisible] = useState(false);
   const [webPickerVisible, setWebPickerVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const displayValue = useMemo(() => {
     if (!value) {
@@ -53,15 +54,32 @@ export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'date
     return formatDateTime(value, options);
   }, [mode, value]);
 
-  const defaultDate = useMemo(() => roundToMinute(value ?? new Date()), [value]);
+  const minimumDate = roundToMinute(new Date());
 
-  const setDueDate = useCallback(
-    (next: Date | null) => {
+  const defaultDate = useMemo(() => {
+    const candidate = roundToMinute(value ?? minimumDate);
+    return candidate.getTime() < minimumDate.getTime() ? minimumDate : candidate;
+  }, [minimumDate, value]);
+
+  const applyDueDate = useCallback(
+    (next: Date | null): boolean => {
       if (next) {
-        onChange(roundToMinute(next));
-      } else {
-        onChange(null);
+        const rounded = roundToMinute(next);
+        const now = roundToMinute(new Date());
+
+        if (rounded.getTime() < now.getTime()) {
+          setErrorMessage('Choose a time in the future.');
+          return false;
+        }
+
+        onChange(rounded);
+        setErrorMessage(null);
+        return true;
       }
+
+      onChange(null);
+      setErrorMessage(null);
+      return true;
     },
     [onChange],
   );
@@ -73,13 +91,15 @@ export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'date
   const handleChange = useCallback(
     (_event: DateTimePickerEvent, selectedDate?: Date) => {
       if (selectedDate) {
-        setDueDate(selectedDate);
+        applyDueDate(selectedDate);
       }
     },
-    [setDueDate],
+    [applyDueDate],
   );
 
   const handleOpenPicker = useCallback(() => {
+    setErrorMessage(null);
+
     if (Platform.OS === 'web') {
       setWebPickerVisible(true);
       return;
@@ -98,7 +118,7 @@ export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'date
 
             const combined = new Date(baseDate);
             combined.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
-            setDueDate(combined);
+            applyDueDate(combined);
           },
         });
       };
@@ -106,6 +126,7 @@ export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'date
       DateTimePickerAndroid.open({
         mode: 'date',
         value: defaultDate,
+        minimumDate,
         onChange: (event, selectedDate) => {
           if (event.type !== 'set' || !selectedDate) {
             return;
@@ -120,13 +141,13 @@ export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'date
     }
 
     setIosPickerVisible(true);
-  }, [defaultDate, setDueDate]);
+  }, [applyDueDate, defaultDate, minimumDate]);
 
   const handleClear = useCallback(() => {
-    setDueDate(null);
+    applyDueDate(null);
     setIosPickerVisible(false);
     setWebPickerVisible(false);
-  }, [setDueDate]);
+  }, [applyDueDate]);
 
   return (
     <View style={styles.container}>
@@ -158,6 +179,12 @@ export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'date
         ) : null}
       </View>
 
+      {errorMessage ? (
+        <Text style={[styles.errorText, { color: palette.danger }]} accessibilityLiveRegion="polite">
+          {errorMessage}
+        </Text>
+      ) : null}
+
       {Platform.OS === 'ios' && iosPickerVisible ? (
         <View style={[styles.iosPickerContainer, { backgroundColor: palette.surfaceElevated }]}
           accessibilityLabel="iOS due date picker">
@@ -166,6 +193,7 @@ export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'date
             display={mode === 'time' ? 'spinner' : 'default'}
             value={defaultDate}
             minuteInterval={1}
+            minimumDate={minimumDate}
             onChange={handleChange}
           />
           <View style={styles.iosPickerActions}>
@@ -188,8 +216,13 @@ export const DueDateField = ({ value, onChange, label = 'Due date', mode = 'date
         <WebDueDatePicker
           visible={webPickerVisible}
           onClose={() => setWebPickerVisible(false)}
-          onSave={setDueDate}
+          onSave={(next) => {
+            if (applyDueDate(next)) {
+              setWebPickerVisible(false);
+            }
+          }}
           initialDate={defaultDate}
+          minimumDate={minimumDate}
         />
       )}
     </View>
@@ -233,6 +266,9 @@ const styles = StyleSheet.create({
   clearText: {
     fontSize: 13,
     fontWeight: '600',
+  },
+  errorText: {
+    fontSize: 13,
   },
   iosPickerContainer: {
     borderRadius: 16,

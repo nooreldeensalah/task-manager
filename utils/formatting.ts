@@ -93,6 +93,8 @@ export const formatDateInput = (date: Date): string => `${date.getFullYear()}-${
 
 export const formatTimeInput = (date: Date): string => `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 
+export const formatDateTimeLocalInput = (date: Date): string => `${formatDateInput(date)}T${formatTimeInput(date)}`;
+
 export const roundToMinute = (date: Date): Date => {
   const next = new Date(date);
   next.setSeconds(0, 0);

@@ -226,6 +226,8 @@
 - [X] T117 [P] Update task list and composer screens for desktop-friendly grid and spacing (`components/task/TaskList.tsx`, `app/index.tsx`)
 - [X] T118 [P] Refine task detail screen responsiveness (`app/task/[id].tsx`, `components/task/TaskDetailCard.tsx`)
 - [X] T119 [P] Refresh global color palette for improved contrast (`constants/Colors.ts`)
+- [X] T120 [P] Prevent past due dates and surface inline validation (`components/common/DueDateField.tsx`)
+- [X] T121 [P] Upgrade web due date picker to native datetime input (`components/common/WebDueDatePicker.tsx`)
 - [ ] T102 [P] Create README.md with project description, setup instructions, and deployment guide
 - [ ] T103 [P] Add error boundary component in `app/_layout.tsx` for graceful error handling
 - [ ] T104 [P] Implement retry logic for failed Firestore operations in taskService
@@ -362,8 +364,8 @@ Stories integrate at checkpoints without blocking each other.
 
 ## Task Summary
 
-- **Total Tasks**: 116
-- **Completed Tasks**: 62 (53%)
+- **Total Tasks**: 118
+- **Completed Tasks**: 64 (54%)
 - **Remaining Tasks**: 54
 
 | Phase | Total | Done | Remaining | Notes |
@@ -376,7 +378,7 @@ Stories integrate at checkpoints without blocking each other.
 | User Story 3 (Animations) | 11 | 0 | 11 | Not started |
 | User Story 4 (Themes) | 11 | 0 | 11 | Not started |
 | User Story 5 (Notifications) | 15 | 3 | 12 | Pending notification scheduling |
-| Polish | 18 | 4 | 14 | In progress |
+| Polish | 20 | 6 | 14 | In progress |
 
 ### Phase Breakdown
 
@@ -388,7 +390,7 @@ Stories integrate at checkpoints without blocking each other.
 - **User Story 3 (P2 - Animations)**: 11 tasks
 - **User Story 4 (P3 - Themes)**: 11 tasks
 - **User Story 5 (P3 - Notifications)**: 15 tasks
-- **Polish Phase**: 18 tasks
+- **Polish Phase**: 20 tasks
 
 **MVP Scope** (Recommended first delivery):
 

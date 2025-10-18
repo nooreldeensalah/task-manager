@@ -1,71 +1,65 @@
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import Button from '@/components/common/Button';
-import Input from '@/components/common/Input';
 import Colors from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
-import { formatDateInput, formatTimeInput, roundToMinute } from '@/utils/formatting';
+import { formatDateTimeLocalInput, roundToMinute } from '@/utils/formatting';
 
 export interface WebDueDatePickerProps {
   visible: boolean;
   onClose: () => void;
   onSave: (date: Date | null) => void;
   initialDate: Date;
+  minimumDate: Date;
 }
 
-export const WebDueDatePicker = ({ visible, onClose, onSave, initialDate }: WebDueDatePickerProps) => {
+export const WebDueDatePicker = ({ visible, onClose, onSave, initialDate, minimumDate }: WebDueDatePickerProps) => {
   const { theme } = useTheme();
   const palette = Colors[theme];
-  const [dateInput, setDateInput] = useState('');
-  const [timeInput, setTimeInput] = useState('');
+  const [dateTimeInput, setDateTimeInput] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  const roundedMinimum = useMemo(() => roundToMinute(minimumDate), [minimumDate]);
+  const minValue = useMemo(() => formatDateTimeLocalInput(roundedMinimum), [roundedMinimum]);
 
   useEffect(() => {
     if (visible) {
       const rounded = roundToMinute(initialDate);
-      setDateInput(formatDateInput(rounded));
-      setTimeInput(formatTimeInput(rounded));
+      setDateTimeInput(formatDateTimeLocalInput(rounded));
       setError(null);
     }
   }, [visible, initialDate]);
 
   const handleSave = useCallback(() => {
-    const trimmedDate = dateInput.trim();
-    const trimmedTime = timeInput.trim();
+    const trimmed = dateTimeInput.trim();
 
-    if (!trimmedDate || !/^\d{4}-\d{2}-\d{2}$/.test(trimmedDate)) {
-      setError('Enter a valid date in YYYY-MM-DD format.');
+    if (!trimmed) {
+      setError('Choose a date and time.');
       return;
     }
 
-    if (!trimmedTime || !/^\d{2}:\d{2}$/.test(trimmedTime)) {
-      setError('Enter a valid time in HH:MM format.');
-      return;
-    }
-
-    const [hoursString, minutesString] = trimmedTime.split(':');
-    const hours = Number.parseInt(hoursString, 10);
-    const minutes = Number.parseInt(minutesString, 10);
-
-    if (Number.isNaN(hours) || Number.isNaN(minutes) || hours > 23 || minutes > 59) {
-      setError('Time must be between 00:00 and 23:59.');
-      return;
-    }
-
-    const candidate = new Date(`${trimmedDate}T${trimmedTime}`);
+    const candidate = new Date(trimmed);
 
     if (Number.isNaN(candidate.getTime())) {
       setError('That date and time could not be parsed.');
       return;
     }
 
-    onSave(candidate);
-  }, [dateInput, timeInput, onSave]);
+    const rounded = roundToMinute(candidate);
+    if (rounded.getTime() < roundedMinimum.getTime()) {
+      setError('Choose a time in the future.');
+      return;
+    }
+
+    onSave(rounded);
+    onClose();
+  }, [dateTimeInput, onClose, onSave, roundedMinimum]);
 
   const handleClear = useCallback(() => {
     onSave(null);
-  }, [onSave]);
+    onClose();
+  }, [onClose, onSave]);
 
   return (
     <Modal
@@ -82,31 +76,28 @@ export const WebDueDatePicker = ({ visible, onClose, onSave, initialDate }: WebD
           <Text style={[styles.title, { color: palette.text }]}>Choose a due date</Text>
           <Text style={[styles.subtitle, { color: palette.textMuted }]}>Pick the exact minute you want to finish.</Text>
 
-          <Input
-            label="Date"
-            placeholder="YYYY-MM-DD"
-            value={dateInput}
-            onChangeText={(text) => {
-              setDateInput(text);
-              setError(null);
-            }}
-            keyboardType="numeric"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-          <Input
-            label="Time"
-            placeholder="HH:MM"
-            value={timeInput}
-            onChangeText={(text) => {
-              setTimeInput(text);
-              setError(null);
-            }}
-            keyboardType="numeric"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+          <label style={{ width: '100%' }}>
+            <Text style={[styles.inputLabel, { color: palette.text }]}>Date &amp; time</Text>
+            <input
+              type="datetime-local"
+              value={dateTimeInput}
+              min={minValue}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setDateTimeInput(event.target.value);
+                setError(null);
+              }}
+              style={{
+                width: '100%',
+                borderRadius: 12,
+                border: `1px solid ${palette.border}`,
+                padding: '12px 14px',
+                fontSize: 16,
+                color: palette.text,
+                backgroundColor: palette.surface,
+                marginTop: 6,
+              }}
+            />
+          </label>
 
           {error ? (
             <Text style={[styles.error, { color: palette.danger }]} accessibilityLiveRegion="polite">
@@ -148,6 +139,10 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     textAlign: 'center',
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   error: {
     fontSize: 13,
