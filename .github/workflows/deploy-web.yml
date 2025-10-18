@@ -7,57 +7,45 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-# Required for GitHub Pages deploy from Actions
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Cancel in-progress runs for the same ref
 concurrency:
   group: pages
   cancel-in-progress: true
 
 env:
-  # Optional: if using project pages (https://<user>.github.io/<repo>)
-  # many SPAs need a base path. If your app uses this, read it in code.
   EXPO_PUBLIC_BASE_URL: /${{ github.event.repository.name }}/
 
 jobs:
   build:
     name: Build Expo web export
     runs-on: ubuntu-latest
-    # Forked PRs don't get repo secrets; skip the build to avoid failures.
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: 20
+          cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      # Expo CLI runs via npx; no global install needed
       - name: Build static web
         env:
-          # Firebase config (public-at-build-time values)
           EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.EXPO_PUBLIC_FIREBASE_API_KEY }}
           EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
           EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
           EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
           EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
-          # Keep CI true for reproducible builds
           CI: true
         run: |
           npx expo --version
-          # Expo SDK 49+ static export:
           npx expo export --platform web --output-dir dist
 
       - name: Upload Pages artifact
@@ -69,7 +57,6 @@ jobs:
     name: Deploy to GitHub Pages
     needs: build
     runs-on: ubuntu-latest
-    # Let PRs get a preview deployment; pushes to main publish to production.
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
