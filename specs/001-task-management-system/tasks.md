@@ -235,9 +235,9 @@
 - [ ] T106 [P] Optimize bundle size by analyzing with `npx expo export --dump-sourcemap`
 - [ ] T107 [P] Add accessibility labels to all interactive components (aria-label, accessibilityLabel)
 - [ ] T108 [P] Test keyboard navigation on web platform
-- [ ] T109 [P] Configure EAS Build profiles in `eas.json` (development, preview, production)
-- [ ] T110 [P] Test iOS build with `eas build --platform ios --profile preview`
-- [ ] T111 [P] Test Android build with `eas build --platform android --profile preview`
+- [X] T109 [P] Configure EAS Build profiles in `eas.json` (development, preview, production)
+- [X] T110 [P] Test iOS build with `eas build --platform ios --profile preview`
+- [X] T111 [P] Test Android build with `eas build --platform android --profile preview`
 - [ ] T112 Performance audit: test with 1000+ tasks and verify <100ms interaction response
 - [ ] T113 Security audit: review Firestore rules and add rate limiting if needed
 - [ ] T114 Code cleanup: remove console.logs, unused imports, commented code
