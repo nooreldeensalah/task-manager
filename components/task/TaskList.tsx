@@ -3,7 +3,7 @@ import { Platform, RefreshControl, ScrollView, StyleSheet, useWindowDimensions, 
 
 import LoadingIndicator from '@/components/common/LoadingIndicator';
 import Colors from '@/constants/Colors';
-import { BREAKPOINTS, CONTAINER_MAX_WIDTH, SPACING } from '@/constants/Layout';
+import { BREAKPOINTS, SPACING } from '@/constants/Layout';
 import { useTheme } from '@/hooks/useTheme';
 import type { Task, TaskId } from '@/types/task';
 
@@ -37,9 +37,6 @@ export const TaskList = ({
   const palette = Colors[theme];
   const { width } = useWindowDimensions();
   const isWideDesktop = Platform.OS === 'web' && width >= BREAKPOINTS.desktop;
-  const containerWidth = Math.min(width, CONTAINER_MAX_WIDTH);
-  const desktopGap = SPACING.md; // Must match styles.listDesktop gap
-  const desktopItemWidth = (containerWidth - desktopGap) / 2;
 
   const shouldShowEmptyState = tasks.length === 0 && !loading && Boolean(ListEmptyComponent);
 
@@ -59,7 +56,7 @@ export const TaskList = ({
             key={task.id}
             style={
               isWideDesktop
-                ? [{ width: desktopItemWidth }]
+                ? styles.desktopItemWrapper
                 : styles.itemWrapper
             }
           >
@@ -105,6 +102,14 @@ const styles = StyleSheet.create({
   },
   itemWrapper: {
     width: '100%',
+  },
+  desktopItemWrapper: {
+    // Use flex-basis instead of fixed width for better responsiveness
+    flexBasis: '50%',
+    flexShrink: 0,
+    flexGrow: 0,
+    // Subtract half the gap from the max width
+    maxWidth: 'calc(50% - 8px)' as any,
   },
   loadingContainer: {
     marginTop: SPACING.lg,

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AuthGate from '@/components/auth/AuthGate';
@@ -214,14 +214,16 @@ function TaskDetailContent() {
               updatingStatus={updatingStatus}
             />
           ) : null}
+          {Platform.OS === 'web' ? (
+            <View style={styles.fabContainerAbsolute} pointerEvents="box-none">
+              <FloatingActionButton
+                onPress={handleGoBack}
+                icon={<Ionicons name="arrow-back" size={24} color={palette.background} />}
+                accessibilityLabel="Go back to task list"
+              />
+            </View>
+          ) : null}
         </ResponsiveContainer>
-        <View style={styles.fabContainerAbsolute} pointerEvents="box-none">
-          <FloatingActionButton
-            onPress={handleGoBack}
-            icon={<Ionicons name="arrow-back" size={24} color={palette.background} />}
-            accessibilityLabel="Go back to task list"
-          />
-        </View>
       </SafeAreaView>
     </>
   );
@@ -253,8 +255,8 @@ const styles = StyleSheet.create({
   },
   fabContainerAbsolute: {
     position: 'absolute',
-    bottom: 40,
-    right: 20,
+    bottom: 6,
+    right: 0,
     left: 0,
     alignItems: 'flex-end',
     zIndex: 10,
