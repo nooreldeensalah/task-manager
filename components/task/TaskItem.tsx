@@ -113,41 +113,59 @@ export const TaskItem = ({ task, onToggle, onDelete, onPress, appearanceDelay = 
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           testID={`task-item-${task.id}`}>
-          <Pressable
-            onPress={handleToggle}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: task.completed }}
-            style={[
-              styles.checkbox,
-              {
-                borderColor: task.completed ? palette.primary : palette.border,
-                backgroundColor: task.completed ? palette.primary : 'transparent',
-              },
-            ]}>
-            {task.completed && <MaterialCommunityIcons name="check" size={18} color={palette.background} />}
-          </Pressable>
-          <View style={styles.content}>
-            <Text
+          <View style={styles.leftColumn}>
+            <Pressable
+              onPress={handleToggle}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: task.completed }}
               style={[
-                styles.title,
+                styles.checkbox,
                 {
-                  color: palette.text,
-                  textDecorationLine: task.completed ? 'line-through' : 'none',
+                  borderColor: task.completed ? palette.primary : palette.border,
+                  backgroundColor: task.completed ? palette.primary : 'transparent',
                 },
-              ]}
-              numberOfLines={2}
-              accessibilityLabel="Task title">
-              {task.title}
-            </Text>
-            <View style={styles.descriptionContainer}>
-              {task.description ? (
-                <Text
-                  style={[styles.description, { color: palette.textMuted }]}
-                  numberOfLines={2}
-                  accessibilityLabel="Task description">
-                  {task.description}
-                </Text>
-              ) : null}
+              ]}>
+              {task.completed && <MaterialCommunityIcons name="check" size={18} color={palette.background} />}
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Delete task"
+              style={styles.deleteButton}
+              onPress={handleDelete}>
+              <MaterialCommunityIcons name="trash-can-outline" size={20} color={palette.danger} />
+            </Pressable>
+          </View>
+          <View style={styles.content}>
+            <View style={styles.topSection}>
+              <Text
+                style={[
+                  styles.title,
+                  {
+                    color: palette.text,
+                    textDecorationLine: task.completed ? 'line-through' : 'none',
+                  },
+                ]}
+                numberOfLines={2}
+                accessibilityLabel="Task title">
+                {task.title}
+              </Text>
+              <View style={styles.descriptionContainer}>
+                {task.description ? (
+                  <Text
+                    style={[styles.description, { color: palette.textMuted }]}
+                    numberOfLines={2}
+                    accessibilityLabel="Task description">
+                    {task.description}
+                  </Text>
+                ) : (
+                  <Text
+                    style={[styles.descriptionPlaceholder, { color: palette.textMuted }]}
+                    numberOfLines={1}
+                    accessibilityLabel="No description provided">
+                    Add a description…
+                  </Text>
+                )}
+              </View>
             </View>
             <View style={styles.metaRow}>
               <Text style={[styles.meta, { color: palette.textMuted }]}>{relativeDate}</Text>
@@ -158,13 +176,6 @@ export const TaskItem = ({ task, onToggle, onDelete, onPress, appearanceDelay = 
               ) : null}
             </View>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Delete task"
-            style={styles.deleteButton}
-            onPress={handleDelete}>
-            <MaterialCommunityIcons name="trash-can-outline" size={22} color={palette.danger} />
-          </Pressable>
         </AnimatedPressable>
       </Animated.View>
 
@@ -184,17 +195,25 @@ export const TaskItem = ({ task, onToggle, onDelete, onPress, appearanceDelay = 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     borderRadius: RADIUS.lg,
     borderWidth: 1,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.md,
     marginBottom: SPACING.md,
     gap: SPACING.sm,
+    minHeight: 88,
+  },
+  leftColumn: {
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 0,
+    alignSelf: 'stretch',
+    paddingVertical: 0,
   },
   checkbox: {
-    width: 28,
-    height: 28,
+    width: 24,
+    height: 24,
     borderRadius: RADIUS.pill,
     borderWidth: 2,
     alignItems: 'center',
@@ -202,7 +221,11 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    justifyContent: 'space-between',
+  },
+  topSection: {
     gap: SPACING.xs,
+    minHeight: 24, // match checkbox height to align top row
   },
   title: {
     ...TYPOGRAPHY.subtitle,
@@ -213,20 +236,31 @@ const styles = StyleSheet.create({
   description: {
     ...TYPOGRAPHY.bodySmall,
   },
+  descriptionPlaceholder: {
+    ...TYPOGRAPHY.bodySmall,
+    fontStyle: 'italic',
+    opacity: 0.7,
+  },
   meta: {
     ...TYPOGRAPHY.caption,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: SPACING.sm,
+    minHeight: 28, // match delete button height to align bottom row
   },
   due: {
     ...TYPOGRAPHY.caption,
     fontWeight: '700',
   },
   deleteButton: {
-    padding: SPACING.xs,
+    width: 28,
+    height: 28,
+    borderRadius: RADIUS.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

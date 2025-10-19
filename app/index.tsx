@@ -281,14 +281,15 @@ function TaskListContent() {
             ListEmptyComponent={filteredEmptyState}
             loading={loading && !refreshing}
           />
+          <View style={styles.fabContainerAbsolute} pointerEvents="box-none">
+            <FloatingActionButton
+              onPress={handleOpenComposer}
+              accessibilityLabel="Create a new task"
+              icon={<MaterialCommunityIcons name="plus" size={24} color={palette.background} />}
+            />
+          </View>
         </View>
       </ResponsiveContainer>
-
-      <FloatingActionButton
-        onPress={handleOpenComposer}
-        accessibilityLabel="Create a new task"
-        icon={<MaterialCommunityIcons name="plus" size={28} color={palette.background} />}
-      />
 
       <Modal
         visible={composerVisible}
@@ -366,7 +367,6 @@ const styles = StyleSheet.create({
   mainOuter: {
     flex: 1,
     paddingTop: 16,
-    paddingBottom: 24,
   },
   mainContent: {
     flex: 1,
@@ -421,6 +421,18 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
+  },
+  fabContainer: {
+    alignItems: 'flex-end',
+  },
+  fabContainerAbsolute: {
+    position: 'absolute',
+    bottom: 24,
+    right: 6,
+    left: 0,
+    alignItems: 'flex-end',
+    zIndex: 10,
+    pointerEvents: 'box-none',
   },
   modalSafeArea: {
     flex: 1,

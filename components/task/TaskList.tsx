@@ -3,7 +3,7 @@ import { Platform, RefreshControl, ScrollView, StyleSheet, useWindowDimensions, 
 
 import LoadingIndicator from '@/components/common/LoadingIndicator';
 import Colors from '@/constants/Colors';
-import { BREAKPOINTS, SPACING } from '@/constants/Layout';
+import { BREAKPOINTS, CONTAINER_MAX_WIDTH, SPACING } from '@/constants/Layout';
 import { useTheme } from '@/hooks/useTheme';
 import type { Task, TaskId } from '@/types/task';
 
@@ -18,6 +18,8 @@ export interface TaskListProps {
   onRefresh?: () => Promise<void> | void;
   ListEmptyComponent?: ReactNode;
   loading?: boolean;
+  /** Extra bottom padding to keep last items above overlays (e.g., a floating FAB) */
+  bottomPadding?: number;
 }
 
 export const TaskList = ({
@@ -29,23 +31,22 @@ export const TaskList = ({
   onRefresh,
   ListEmptyComponent,
   loading = false,
+  bottomPadding = 0,
 }: TaskListProps) => {
   const { theme } = useTheme();
   const palette = Colors[theme];
   const { width } = useWindowDimensions();
   const isWideDesktop = Platform.OS === 'web' && width >= BREAKPOINTS.desktop;
+  const containerWidth = Math.min(width, CONTAINER_MAX_WIDTH);
+  const desktopGap = SPACING.md; // Must match styles.listDesktop gap
+  const desktopItemWidth = (containerWidth - desktopGap) / 2;
 
   const shouldShowEmptyState = tasks.length === 0 && !loading && Boolean(ListEmptyComponent);
 
   return (
     <ScrollView
       style={[styles.scrollView, { backgroundColor: 'transparent' }]}
-      contentContainerStyle={[
-        styles.contentContainer,
-        {
-          paddingBottom: isWideDesktop ? SPACING.xl : 100,
-        },
-      ]}
+      contentContainerStyle={[styles.contentContainer, bottomPadding ? { paddingBottom: bottomPadding } : null]}
       refreshControl={
         onRefresh ? (
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.primary} />
@@ -54,7 +55,14 @@ export const TaskList = ({
       accessibilityLabel="Task list">
       <View style={[styles.list, isWideDesktop ? styles.listDesktop : null]}>
         {tasks.map((task, index) => (
-          <View key={task.id} style={isWideDesktop ? styles.desktopItemWrapper : styles.itemWrapper}>
+          <View
+            key={task.id}
+            style={
+              isWideDesktop
+                ? [{ width: desktopItemWidth }]
+                : styles.itemWrapper
+            }
+          >
             <TaskItem
               task={task}
               onToggle={onToggleTask}
@@ -97,11 +105,6 @@ const styles = StyleSheet.create({
   },
   itemWrapper: {
     width: '100%',
-  },
-  desktopItemWrapper: {
-    flexBasis: '48%',
-    maxWidth: 440,
-    minWidth: 300,
   },
   loadingContainer: {
     marginTop: SPACING.lg,
