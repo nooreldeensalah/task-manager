@@ -1,10 +1,12 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AuthGate from '@/components/auth/AuthGate';
 import EmptyState from '@/components/common/EmptyState';
+import FloatingActionButton from '@/components/common/FloatingActionButton';
 import LoadingIndicator from '@/components/common/LoadingIndicator';
 import ResponsiveContainer from '@/components/common/ResponsiveContainer';
 import TaskDetailCard from '@/components/task/TaskDetailCard';
@@ -16,6 +18,7 @@ import { validateTaskDescription, validateTaskTitle } from '@/utils/validation';
 
 function TaskDetailContent() {
   const { id } = useLocalSearchParams<{ id?: string }>();
+  const router = useRouter();
   const { theme } = useTheme();
   const palette = Colors[theme];
   const {
@@ -162,6 +165,10 @@ function TaskDetailContent() {
 
   const headerTitle = task ? task.title : 'Task not found';
 
+  const handleGoBack = useCallback(() => {
+    router.back();
+  }, [router]);
+
   return (
     <>
       <Stack.Screen
@@ -208,6 +215,13 @@ function TaskDetailContent() {
             />
           ) : null}
         </ResponsiveContainer>
+        <View style={styles.fabContainerAbsolute} pointerEvents="box-none">
+          <FloatingActionButton
+            onPress={handleGoBack}
+            icon={<Ionicons name="arrow-back" size={24} color={palette.background} />}
+            accessibilityLabel="Go back to task list"
+          />
+        </View>
       </SafeAreaView>
     </>
   );
@@ -236,6 +250,15 @@ export default function TaskDetailScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+  },
+  fabContainerAbsolute: {
+    position: 'absolute',
+    bottom: 40,
+    right: 20,
+    left: 0,
+    alignItems: 'flex-end',
+    zIndex: 10,
+    pointerEvents: 'box-none',
   },
   mainOuter: {
     flex: 1,
