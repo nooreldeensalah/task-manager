@@ -2,7 +2,7 @@ import { Modal, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-n
 
 import { Button } from '@/components/common/Button';
 import Colors from '@/constants/Colors';
-import { CONTAINER_MAX_WIDTH, RADIUS, SPACING, TYPOGRAPHY } from '@/constants/Layout';
+import { RADIUS, SPACING, TYPOGRAPHY } from '@/constants/Layout';
 import { useTheme } from '@/hooks/useTheme';
 
 export interface ConfirmDialogProps {
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    maxWidth: CONTAINER_MAX_WIDTH,
+    maxWidth: 450,
     alignSelf: 'center',
     borderRadius: RADIUS.lg,
     padding: SPACING.lg,
@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
+    gap: SPACING.md,
   },
   title: {
     ...TYPOGRAPHY.titleMd,
@@ -99,6 +100,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: SPACING.sm,
+    flexWrap: 'wrap',
   },
 });
 

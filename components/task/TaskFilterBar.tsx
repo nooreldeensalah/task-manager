@@ -135,7 +135,7 @@ const TaskFilterBarComponent = ({
                   },
                 ]}
               >
-                {label} {count}
+                {label} ({count})
               </Text>
             </Pressable>
           );

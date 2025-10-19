@@ -1,10 +1,10 @@
+import { useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { Platform, RefreshControl, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import type { ListRenderItemInfo } from 'react-native';
+import { FlatList, Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import LoadingIndicator from '@/components/common/LoadingIndicator';
-import Colors from '@/constants/Colors';
 import { BREAKPOINTS, SPACING } from '@/constants/Layout';
-import { useTheme } from '@/hooks/useTheme';
 import type { Task, TaskId } from '@/types/task';
 
 import TaskItem from './TaskItem';
@@ -33,83 +33,90 @@ export const TaskList = ({
   loading = false,
   bottomPadding = 0,
 }: TaskListProps) => {
-  const { theme } = useTheme();
-  const palette = Colors[theme];
   const { width } = useWindowDimensions();
   const isWideDesktop = Platform.OS === 'web' && width >= BREAKPOINTS.desktop;
+  const numColumns = isWideDesktop ? 2 : 1;
 
   const shouldShowEmptyState = tasks.length === 0 && !loading && Boolean(ListEmptyComponent);
 
-  return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: 'transparent' }]}
-      contentContainerStyle={[styles.contentContainer, bottomPadding ? { paddingBottom: bottomPadding } : null]}
-      refreshControl={
-        onRefresh ? (
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.primary} />
-        ) : undefined
-      }
-      accessibilityLabel="Task list">
-      <View style={[styles.list, isWideDesktop ? styles.listDesktop : null]}>
-        {tasks.map((task, index) => (
-          <View
-            key={task.id}
-            style={
-              isWideDesktop
-                ? styles.desktopItemWrapper
-                : styles.itemWrapper
-            }
-          >
-            <TaskItem
-              task={task}
-              onToggle={onToggleTask}
-              onDelete={onDeleteTask}
-              onPress={onTaskPress}
-              appearanceDelay={index * 40}
-            />
-          </View>
-        ))}
-      </View>
+  const renderTask = useCallback(({ item, index }: ListRenderItemInfo<Task>) => (
+    <View style={[styles.itemWrapper, isWideDesktop ? styles.desktopItemWrapper : styles.itemWrapperSingle]}>
+      <TaskItem
+        task={item}
+        onToggle={onToggleTask}
+        onDelete={onDeleteTask}
+        onPress={onTaskPress}
+        appearanceDelay={index * 40}
+      />
+    </View>
+  ), [isWideDesktop, onDeleteTask, onTaskPress, onToggleTask]);
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <LoadingIndicator />
-        </View>
-      ) : null}
-      {shouldShowEmptyState ? (
+  const keyExtractor = useCallback((task: Task) => task.id, []);
+
+  const emptyComponent = shouldShowEmptyState
+    ? () => (
         <View style={[styles.emptyState, isWideDesktop ? styles.emptyStateDesktop : null]}>
           {ListEmptyComponent}
         </View>
-      ) : null}
-    </ScrollView>
+      )
+    : undefined;
+
+  const footerComponent = loading
+    ? () => (
+        <View style={styles.loadingContainer}>
+          <LoadingIndicator />
+        </View>
+      )
+    : undefined;
+
+  const refreshingState = onRefresh ? refreshing : false;
+
+  return (
+    <FlatList
+      accessibilityLabel="Task list"
+      data={tasks}
+      keyExtractor={keyExtractor}
+      renderItem={renderTask}
+      numColumns={numColumns}
+      style={[styles.list]}
+      contentContainerStyle={[
+        styles.contentContainer,
+        bottomPadding ? { paddingBottom: bottomPadding } : null,
+        tasks.length === 0 ? styles.contentContainerEmpty : null,
+      ]}
+      columnWrapperStyle={isWideDesktop ? styles.desktopColumnWrapper : undefined}
+      ListEmptyComponent={emptyComponent}
+      ListFooterComponent={footerComponent}
+      refreshing={refreshingState}
+      onRefresh={onRefresh}
+      showsVerticalScrollIndicator={false}
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
   contentContainer: {
+    paddingVertical: SPACING.xs,
+  },
+  contentContainerEmpty: {
     flexGrow: 1,
+    justifyContent: 'center',
   },
   list: {
-    flexGrow: 1,
-  },
-  listDesktop: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
+    flex: 1,
   },
   itemWrapper: {
+    flex: 1,
+    minWidth: 0,
+  },
+  itemWrapperSingle: {
     width: '100%',
   },
   desktopItemWrapper: {
-    // Use flex-basis instead of fixed width for better responsiveness
-    flexBasis: '50%',
-    flexShrink: 0,
-    flexGrow: 0,
-    // Subtract half the gap from the max width
-    maxWidth: 'calc(50% - 8px)' as any,
+    paddingHorizontal: SPACING.xs,
+  },
+  desktopColumnWrapper: {
+    paddingHorizontal: SPACING.xs,
   },
   loadingContainer: {
     marginTop: SPACING.lg,

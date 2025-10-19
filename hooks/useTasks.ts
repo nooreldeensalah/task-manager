@@ -1,4 +1,3 @@
-import type { FirestoreError, Unsubscribe } from 'firebase/firestore';
 import { useCallback, useContext } from 'react';
 
 import { TaskContext } from '@/contexts/TaskContext';
@@ -7,23 +6,11 @@ import {
     createTask as createTaskService,
     deleteTask as deleteTaskService,
     fetchTasks as fetchTasksService,
-    subscribeToTasks as subscribeToTasksService,
     updateTask as updateTaskService,
 } from '@/services/taskService';
 import type { Task, TaskDraft, TaskId, TaskUpdate } from '@/types/task';
+import { toErrorMessage } from '@/utils/errors';
 import { normalizeDescription, normalizeTitle } from '@/utils/validation';
-
-const toErrorMessage = (error: unknown): string => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  if (typeof error === 'string') {
-    return error;
-  }
-
-  return 'Something went wrong. Please try again.';
-};
 
 export const useTasks = () => {
   const context = useContext(TaskContext);
@@ -64,8 +51,6 @@ export const useTasks = () => {
 
   const createTask = useCallback(
     async (draft: TaskDraft): Promise<Task> => {
-      setLoading(true);
-
       try {
         const newTask = await createTaskService(userId, draft);
         dispatch({ type: 'ADD_TASK', payload: newTask });
@@ -74,17 +59,13 @@ export const useTasks = () => {
         const message = toErrorMessage(error);
         setError(message);
         throw error;
-      } finally {
-        setLoading(false);
       }
     },
-    [dispatch, setError, setLoading, userId],
+    [dispatch, setError, userId],
   );
 
   const updateTask = useCallback(
     async (taskId: TaskId, updates: TaskUpdate): Promise<void> => {
-      setLoading(true);
-
       try {
         await updateTaskService(userId, taskId, updates);
 
@@ -135,17 +116,13 @@ export const useTasks = () => {
         const message = toErrorMessage(error);
         setError(message);
         throw error;
-      } finally {
-        setLoading(false);
       }
     },
-    [dispatch, setError, setLoading, state.tasks, userId],
+    [dispatch, setError, state.tasks, userId],
   );
 
   const deleteTask = useCallback(
     async (taskId: TaskId): Promise<void> => {
-      setLoading(true);
-
       try {
         await deleteTaskService(userId, taskId);
         dispatch({ type: 'DELETE_TASK', payload: taskId });
@@ -153,11 +130,9 @@ export const useTasks = () => {
         const message = toErrorMessage(error);
         setError(message);
         throw error;
-      } finally {
-        setLoading(false);
       }
     },
-    [dispatch, setError, setLoading, userId],
+    [dispatch, setError, userId],
   );
 
   const fetchTasks = useCallback(async (): Promise<Task[]> => {
@@ -176,31 +151,7 @@ export const useTasks = () => {
     } finally {
       setLoading(false);
     }
-  }, [dispatch, setError, setLoading, userId]);
-
-  const subscribeToTasks = useCallback(
-    (onError?: (error: FirestoreError) => void): Unsubscribe => {
-      setLoading(true);
-
-      return subscribeToTasksService(
-        userId,
-        (tasks) => {
-          dispatch({ type: 'SET_TASKS', payload: tasks });
-          setLoading(false);
-          setError(null);
-          setInitialized(true);
-        },
-        (error) => {
-          const message = toErrorMessage(error);
-          setError(message);
-          setLoading(false);
-          setInitialized(true);
-          onError?.(error);
-        },
-      );
-    },
-    [dispatch, setError, setInitialized, setLoading, userId],
-  );
+  }, [dispatch, setError, setInitialized, setLoading, userId]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -215,7 +166,6 @@ export const useTasks = () => {
     updateTask,
     deleteTask,
     fetchTasks,
-    subscribeToTasks,
     clearError,
   };
 };

@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -41,7 +41,6 @@ function TaskListContent() {
     updateTask,
     deleteTask,
     fetchTasks,
-    subscribeToTasks,
     clearError,
     initialized,
   } = useTasks();
@@ -51,12 +50,6 @@ function TaskListContent() {
   const [composerVisible, setComposerVisible] = useState(false);
   const [statusFilter, setStatusFilter] = useState<TaskStatusFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  useEffect(() => {
-    const unsubscribe = subscribeToTasks();
-
-    return unsubscribe;
-  }, [subscribeToTasks]);
-
   const handleCreateTask = useCallback(
     async ({ title, description, dueDate }: { title: string; description?: string | null; dueDate: Date | null }) => {
       setCreating(true);

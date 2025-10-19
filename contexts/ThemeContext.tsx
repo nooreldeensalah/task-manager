@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   createContext,
   useCallback,
@@ -9,6 +10,7 @@ import {
 import { Appearance, type ColorSchemeName } from 'react-native';
 
 import type { ThemePreference } from '@/types/preferences';
+import { STORAGE_KEYS } from '@/constants/Config';
 
 export type ThemeName = 'light' | 'dark';
 
@@ -30,6 +32,7 @@ interface ThemeProviderProps {
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [preference, setPreferenceState] = useState<ThemePreference>('system');
   const [systemTheme, setSystemTheme] = useState<ColorSchemeName>(Appearance.getColorScheme());
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
@@ -38,6 +41,46 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
     return () => subscription.remove();
   }, []);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const hydratePreference = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(STORAGE_KEYS.THEME_PREFERENCE);
+
+        if (!isActive || !stored) {
+          return;
+        }
+
+        if (stored === 'light' || stored === 'dark' || stored === 'system') {
+          setPreferenceState(stored);
+        }
+      } catch (error) {
+        console.warn('Failed to load stored theme preference:', error);
+      } finally {
+        if (isActive) {
+          setHydrated(true);
+        }
+      }
+    };
+
+    hydratePreference();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    AsyncStorage.setItem(STORAGE_KEYS.THEME_PREFERENCE, preference).catch((error) => {
+      console.warn('Failed to persist theme preference:', error);
+    });
+  }, [hydrated, preference]);
 
   const resolvedTheme: ThemeName = useMemo(() => {
     if (preference === 'system') {

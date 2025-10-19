@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,7 +16,6 @@ import { validateTaskDescription, validateTaskTitle } from '@/utils/validation';
 
 function TaskDetailContent() {
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const router = useRouter();
   const { theme } = useTheme();
   const palette = Colors[theme];
   const {
@@ -24,7 +23,6 @@ function TaskDetailContent() {
     loading,
     error,
     updateTask,
-    subscribeToTasks,
     clearError,
     initialized,
   } = useTasks();
@@ -39,11 +37,6 @@ function TaskDetailContent() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const task = useMemo(() => tasks.find((item) => item.id === id), [tasks, id]);
-
-  useEffect(() => {
-    const unsubscribe = subscribeToTasks();
-    return unsubscribe;
-  }, [subscribeToTasks]);
 
   useEffect(() => {
     if (task) {

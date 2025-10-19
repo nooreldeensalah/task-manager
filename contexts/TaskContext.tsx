@@ -2,8 +2,10 @@ import { createContext, useEffect, useMemo, useReducer, type Dispatch, type Reac
 
 import { useAuth } from '@/hooks/useAuth';
 import { initialTaskState, taskReducer } from '@/reducers/taskReducer';
+import { subscribeToTasks as subscribeToTasksService } from '@/services/taskService';
 import type { TaskAction } from '@/types/actions';
 import type { TaskState } from '@/types/task';
+import { toErrorMessage } from '@/utils/errors';
 
 interface TaskContextValue {
   state: TaskState;
@@ -21,7 +23,40 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
   const { user } = useAuth();
 
   useEffect(() => {
-    dispatch({ type: 'RESET' });
+    if (!user) {
+      dispatch({ type: 'RESET' });
+      return;
+    }
+
+    let isActive = true;
+
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+
+    const unsubscribe = subscribeToTasksService(
+      user.uid,
+      (tasks) => {
+        if (!isActive) {
+          return;
+        }
+
+        dispatch({ type: 'SET_TASKS', payload: tasks });
+      },
+      (error) => {
+        if (!isActive) {
+          return;
+        }
+
+        const message = toErrorMessage(error);
+        dispatch({ type: 'SET_ERROR', payload: message });
+        dispatch({ type: 'SET_LOADING', payload: false });
+      },
+    );
+
+    return () => {
+      isActive = false;
+      unsubscribe();
+    };
   }, [user?.uid]);
 
   const value = useMemo(
