@@ -96,9 +96,9 @@ export const TaskDetailCard = ({
   );
 
   const completionIconName = task.completed ? 'check-circle-outline' : 'check-circle';
-  const completionBackground = task.completed ? palette.surface : palette.primary;
-  const completionIconColor = task.completed ? palette.primary : palette.background;
-  const completionBorderColor = task.completed ? palette.primary : 'transparent';
+  const completionBackground = task.completed ? palette.primary : 'transparent';
+  const completionIconColor = task.completed ? palette.text : palette.primary;
+  const completionBorderColor = task.completed ? 'transparent' : palette.primary;
 
   return (
     <View
