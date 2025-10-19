@@ -2,7 +2,7 @@ import { Modal, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-n
 
 import { Button } from '@/components/common/Button';
 import Colors from '@/constants/Colors';
-import { RADIUS, SPACING, TYPOGRAPHY } from '@/constants/Layout';
+import { CONTAINER_MAX_WIDTH, RADIUS, SPACING, TYPOGRAPHY } from '@/constants/Layout';
 import { useTheme } from '@/hooks/useTheme';
 
 export interface ConfirmDialogProps {
@@ -77,6 +77,8 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
+    maxWidth: CONTAINER_MAX_WIDTH,
+    alignSelf: 'center',
     borderRadius: RADIUS.lg,
     padding: SPACING.lg,
     elevation: 4,
