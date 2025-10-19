@@ -38,8 +38,13 @@ const mapAuthError = (error: unknown): string => {
 };
 
 const TITLE_COPY: Record<AuthMode, string> = {
-  signin: 'Sign in to continue',
-  signup: 'Create your account',
+  signin: 'Welcome back',
+  signup: 'Get started',
+};
+
+const SUBTITLE_COPY: Record<AuthMode, string> = {
+  signin: 'Sign in to your account to continue',
+  signup: 'Create a new account to get started',
 };
 
 const CTA_COPY: Record<AuthMode, string> = {
@@ -102,7 +107,7 @@ const AuthGate = () => {
       style={[styles.safeArea, { backgroundColor: palette.background }]}
       edges={Platform.OS === 'ios' ? ['top'] : undefined}
     >
-      <ResponsiveContainer outerStyle={styles.outer} style={styles.inner}>
+      <ResponsiveContainer outerStyle={styles.outer} style={[styles.inner, Platform.OS === 'web' && { maxWidth: 600 }]}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.keyboard}
@@ -114,6 +119,7 @@ const AuthGate = () => {
           >
             <View style={[styles.card, { backgroundColor: palette.surfaceElevated, borderColor: palette.border }]}>
               <Text style={[styles.title, { color: palette.text }]}>{TITLE_COPY[mode]}</Text>
+              <Text style={[styles.subtitle, { color: palette.textMuted }]}>{SUBTITLE_COPY[mode]}</Text>
 
               <Input
                 label="Email"
@@ -123,7 +129,7 @@ const AuthGate = () => {
                 autoCapitalize="none"
                 autoComplete="email"
                 textContentType="emailAddress"
-                placeholder="you@example.com"
+                placeholder="Enter your email"
                 editable={!submitting}
               />
 
@@ -192,11 +198,16 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     padding: 24,
-    gap: 16,
+    gap: 20,
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
+  },
+  subtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '400',
   },
   errorText: {
     fontSize: 14,
