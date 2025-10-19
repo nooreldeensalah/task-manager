@@ -16,15 +16,6 @@ export const EmptyState = ({ title, description, action }: EmptyStateProps) => {
 
   return (
     <View style={styles.container}>
-      <View
-        style={styles.emojiContainer}
-        accessible
-        accessibilityRole="image"
-        accessibilityLabel="Clipboard illustration">
-        <Text style={styles.emoji} accessibilityElementsHidden>
-          ➕
-        </Text>
-      </View>
       <Text style={[styles.title, { color: palette.text }]}>{title}</Text>
       {description ? <Text style={[styles.description, { color: palette.textMuted }]}>{description}</Text> : null}
       {action ? <View style={styles.action}>{action}</View> : null}
@@ -34,21 +25,9 @@ export const EmptyState = ({ title, description, action }: EmptyStateProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 48,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 16,
-  },
-  emojiContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(97, 81, 255, 0.08)',
-  },
-  emoji: {
-    fontSize: 32,
   },
   title: {
     fontSize: 20,

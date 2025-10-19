@@ -116,7 +116,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyState: {
-    marginTop: SPACING.xl,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyStateDesktop: {
     alignSelf: 'center',
