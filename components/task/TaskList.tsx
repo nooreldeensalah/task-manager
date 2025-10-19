@@ -43,7 +43,7 @@ export const TaskList = ({
       contentContainerStyle={[
         styles.contentContainer,
         {
-          paddingBottom: isWideDesktop ? SPACING.xl : SPACING.lg,
+          paddingBottom: isWideDesktop ? SPACING.xl : 100,
         },
       ]}
       refreshControl={
@@ -86,7 +86,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    paddingTop: SPACING.md,
   },
   list: {
     flexGrow: 1,

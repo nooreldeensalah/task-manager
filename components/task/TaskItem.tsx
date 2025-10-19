@@ -139,14 +139,16 @@ export const TaskItem = ({ task, onToggle, onDelete, onPress, appearanceDelay = 
               accessibilityLabel="Task title">
               {task.title}
             </Text>
-            {task.description ? (
-              <Text
-                style={[styles.description, { color: palette.textMuted }]}
-                numberOfLines={2}
-                accessibilityLabel="Task description">
-                {task.description}
-              </Text>
-            ) : null}
+            <View style={styles.descriptionContainer}>
+              {task.description ? (
+                <Text
+                  style={[styles.description, { color: palette.textMuted }]}
+                  numberOfLines={2}
+                  accessibilityLabel="Task description">
+                  {task.description}
+                </Text>
+              ) : null}
+            </View>
             <View style={styles.metaRow}>
               <Text style={[styles.meta, { color: palette.textMuted }]}>{relativeDate}</Text>
               {dueDateLabel ? (
@@ -204,6 +206,9 @@ const styles = StyleSheet.create({
   },
   title: {
     ...TYPOGRAPHY.subtitle,
+  },
+  descriptionContainer: {
+    minHeight: TYPOGRAPHY.bodySmall.lineHeight * 2,
   },
   description: {
     ...TYPOGRAPHY.bodySmall,

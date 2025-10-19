@@ -16,8 +16,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AuthGate from '@/components/auth/AuthGate';
 import Button from '@/components/common/Button';
 import EmptyState from '@/components/common/EmptyState';
+import FloatingActionButton from '@/components/common/FloatingActionButton';
 import LoadingIndicator from '@/components/common/LoadingIndicator';
 import ResponsiveContainer from '@/components/common/ResponsiveContainer';
+import TaskFilterBar, { type TaskStatusFilter } from '@/components/task/TaskFilterBar';
 import TaskInput from '@/components/task/TaskInput';
 import TaskList from '@/components/task/TaskList';
 import Colors from '@/constants/Colors';
@@ -29,7 +31,7 @@ import type { TaskId } from '@/types/task';
 function TaskListContent() {
   const router = useRouter();
   const { signOut: signOutUser, user } = useAuth();
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const palette = Colors[theme];
   const {
     tasks,
@@ -46,6 +48,8 @@ function TaskListContent() {
   const [refreshing, setRefreshing] = useState(false);
   const [creating, setCreating] = useState(false);
   const [composerVisible, setComposerVisible] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<TaskStatusFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   useEffect(() => {
     const unsubscribe = subscribeToTasks();
 
@@ -138,6 +142,61 @@ function TaskListContent() {
     [],
   );
 
+  const statusCounts = useMemo(() => {
+    return tasks.reduce(
+      (acc, task) => {
+        acc.all += 1;
+
+        if (task.completed) {
+          acc.completed += 1;
+        } else {
+          acc.active += 1;
+        }
+
+        return acc;
+      },
+      { all: 0, active: 0, completed: 0 } as Record<TaskStatusFilter, number>,
+    );
+  }, [tasks]);
+
+  const filteredTasks = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return tasks.filter((task) => {
+      if (statusFilter === 'completed' && !task.completed) {
+        return false;
+      }
+
+      if (statusFilter === 'active' && task.completed) {
+        return false;
+      }
+
+      if (query.length === 0) {
+        return true;
+      }
+
+      const titleMatch = task.title.toLowerCase().includes(query);
+      const descriptionMatch = (task.description ?? '').toLowerCase().includes(query);
+
+      return titleMatch || descriptionMatch;
+    });
+  }, [tasks, searchQuery, statusFilter]);
+
+  const filteredEmptyState = useMemo(() => {
+    const hasInitialState = tasks.length === 0 && searchQuery.trim().length === 0 && statusFilter === 'all';
+
+    if (hasInitialState) {
+      return emptyState;
+    }
+
+    return (
+      <EmptyState
+        title="No tasks match your filters"
+        description="Try adjusting your filters or updating your search."
+      />
+    );
+  }, [emptyState, searchQuery, statusFilter, tasks.length]);
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
       <ResponsiveContainer outerStyle={styles.mainOuter} style={styles.mainContent}>
@@ -152,6 +211,24 @@ function TaskListContent() {
           </View>
           <View style={styles.headerActions}>
             <Pressable
+              onPress={toggleTheme}
+              accessibilityRole="button"
+              accessibilityLabel={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+              hitSlop={8}
+              style={({ pressed }) => [
+                styles.headerAction,
+                {
+                  opacity: pressed ? 0.6 : 1,
+                },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name={theme === 'dark' ? 'white-balance-sunny' : 'weather-night'}
+                size={24}
+                color={palette.text}
+              />
+            </Pressable>
+            <Pressable
               onPress={handleSignOut}
               accessibilityRole="button"
               accessibilityLabel="Sign out"
@@ -165,22 +242,17 @@ function TaskListContent() {
             >
               <MaterialCommunityIcons name="logout" size={24} color={palette.text} />
             </Pressable>
-            <Pressable
-              onPress={handleOpenComposer}
-              accessibilityRole="button"
-              accessibilityLabel="Create a new task"
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.headerAction,
-                {
-                  opacity: pressed ? 0.6 : 1,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons name="plus" size={28} color={palette.primary} />
-            </Pressable>
           </View>
         </View>
+
+        <TaskFilterBar
+          filter={statusFilter}
+          counts={statusCounts}
+          onFilterChange={setStatusFilter}
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          onClearSearch={() => setSearchQuery('')}
+        />
 
         {error ? (
           <View
@@ -200,17 +272,23 @@ function TaskListContent() {
 
         <View style={styles.listContainer}>
           <TaskList
-            tasks={tasks}
+            tasks={filteredTasks}
             onToggleTask={handleToggleTask}
             onDeleteTask={handleDeleteTask}
             onTaskPress={handleTaskPress}
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            ListEmptyComponent={emptyState}
+            ListEmptyComponent={filteredEmptyState}
             loading={loading && !refreshing}
           />
         </View>
       </ResponsiveContainer>
+
+      <FloatingActionButton
+        onPress={handleOpenComposer}
+        accessibilityLabel="Create a new task"
+        icon={<MaterialCommunityIcons name="plus" size={28} color={palette.background} />}
+      />
 
       <Modal
         visible={composerVisible}
