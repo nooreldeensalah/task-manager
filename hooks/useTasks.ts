@@ -4,11 +4,11 @@ import { useCallback, useContext } from 'react';
 import { TaskContext } from '@/contexts/TaskContext';
 import { useAuth } from '@/hooks/useAuth';
 import {
-  createTask as createTaskService,
-  deleteTask as deleteTaskService,
-  fetchTasks as fetchTasksService,
-  subscribeToTasks as subscribeToTasksService,
-  updateTask as updateTaskService,
+    createTask as createTaskService,
+    deleteTask as deleteTaskService,
+    fetchTasks as fetchTasksService,
+    subscribeToTasks as subscribeToTasksService,
+    updateTask as updateTaskService,
 } from '@/services/taskService';
 import type { Task, TaskDraft, TaskId, TaskUpdate } from '@/types/task';
 import { normalizeDescription, normalizeTitle } from '@/utils/validation';
@@ -51,6 +51,13 @@ export const useTasks = () => {
   const setError = useCallback(
     (error: string | null) => {
       dispatch({ type: 'SET_ERROR', payload: error });
+    },
+    [dispatch],
+  );
+
+  const setInitialized = useCallback(
+    (value: boolean) => {
+      dispatch({ type: 'SET_INITIALIZED', payload: value });
     },
     [dispatch],
   );
@@ -159,10 +166,12 @@ export const useTasks = () => {
     try {
       const tasks = await fetchTasksService(userId);
       dispatch({ type: 'SET_TASKS', payload: tasks });
+      setInitialized(true);
       return tasks;
     } catch (error) {
       const message = toErrorMessage(error);
       setError(message);
+      setInitialized(true);
       throw error;
     } finally {
       setLoading(false);
@@ -179,16 +188,18 @@ export const useTasks = () => {
           dispatch({ type: 'SET_TASKS', payload: tasks });
           setLoading(false);
           setError(null);
+          setInitialized(true);
         },
         (error) => {
           const message = toErrorMessage(error);
           setError(message);
           setLoading(false);
+          setInitialized(true);
           onError?.(error);
         },
       );
     },
-    [dispatch, setError, setLoading, userId],
+    [dispatch, setError, setInitialized, setLoading, userId],
   );
 
   const clearError = useCallback(() => {
@@ -199,6 +210,7 @@ export const useTasks = () => {
     tasks: state.tasks,
     loading: state.loading,
     error: state.error,
+    initialized: state.initialized,
     createTask,
     updateTask,
     deleteTask,

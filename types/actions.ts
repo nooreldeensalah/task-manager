@@ -7,4 +7,5 @@ export type TaskAction =
   | { type: 'DELETE_TASK'; payload: string }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_INITIALIZED'; payload: boolean }
   | { type: 'RESET' };

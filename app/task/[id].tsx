@@ -24,9 +24,9 @@ function TaskDetailContent() {
     loading,
     error,
     updateTask,
-    fetchTasks,
     subscribeToTasks,
     clearError,
+    initialized,
   } = useTasks();
 
   const [editing, setEditing] = useState(false);
@@ -42,12 +42,8 @@ function TaskDetailContent() {
 
   useEffect(() => {
     const unsubscribe = subscribeToTasks();
-    fetchTasks().catch(() => {
-      // Errors are surfaced through context state and handled below.
-    });
-
     return unsubscribe;
-  }, [fetchTasks, subscribeToTasks]);
+  }, [subscribeToTasks]);
 
   useEffect(() => {
     if (task) {
@@ -153,13 +149,12 @@ function TaskDetailContent() {
     setUpdatingStatus(true);
     try {
       await updateTask(task.id, { completed });
-      await fetchTasks();
     } catch (error) {
       console.error('Failed to toggle task completion:', error);
     } finally {
       setUpdatingStatus(false);
     }
-  }, [task, updateTask, fetchTasks]);
+  }, [task, updateTask]);
 
   const headerTitle = task ? task.title : 'Task not found';
 
@@ -175,11 +170,15 @@ function TaskDetailContent() {
       />
       <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]} edges={['bottom']}>
         <ResponsiveContainer outerStyle={styles.mainOuter} style={styles.mainContent}>
-          {!task && loading ? (
+          {!initialized ? (
             <LoadingIndicator fullScreen />
           ) : null}
 
-          {!task && !loading ? (
+          {!task && initialized && loading ? (
+            <LoadingIndicator fullScreen />
+          ) : null}
+
+          {!task && initialized && !loading ? (
             <View style={styles.emptyStateContainer}>
               <EmptyState
                 title="Task not found"

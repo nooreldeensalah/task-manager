@@ -45,4 +45,6 @@ export interface TaskState {
   tasks: Task[];
   loading: boolean;
   error: string | null;
+  /** Has the task list been loaded (successfully or with error) at least once this session? */
+  initialized: boolean;
 }

@@ -43,6 +43,7 @@ function TaskListContent() {
     fetchTasks,
     subscribeToTasks,
     clearError,
+    initialized,
   } = useTasks();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -53,12 +54,8 @@ function TaskListContent() {
   useEffect(() => {
     const unsubscribe = subscribeToTasks();
 
-    fetchTasks().catch(() => {
-      // Errors are surfaced via context state.
-    });
-
     return unsubscribe;
-  }, [fetchTasks, subscribeToTasks]);
+  }, [subscribeToTasks]);
 
   const handleCreateTask = useCallback(
     async ({ title, description, dueDate }: { title: string; description?: string | null; dueDate: Date | null }) => {
@@ -191,6 +188,9 @@ function TaskListContent() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]} edges={['bottom']}>
+      {!initialized ? (
+        <LoadingIndicator fullScreen />
+      ) : (
       <ResponsiveContainer outerStyle={styles.mainOuter} style={styles.mainContent}>
         <TaskFilterBar
           filter={statusFilter}
@@ -226,7 +226,7 @@ function TaskListContent() {
             refreshing={refreshing}
             onRefresh={handleRefresh}
             ListEmptyComponent={filteredEmptyState}
-            loading={loading && !refreshing}
+            loading={initialized && loading && !refreshing}
           />
           <View style={styles.fabContainerAbsolute} pointerEvents="box-none">
             <FloatingActionButton
@@ -237,6 +237,7 @@ function TaskListContent() {
           </View>
         </View>
       </ResponsiveContainer>
+      )}
 
       <Modal
         visible={composerVisible}

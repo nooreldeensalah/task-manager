@@ -5,6 +5,7 @@ export const initialTaskState: TaskState = {
   tasks: [],
   loading: false,
   error: null,
+  initialized: false,
 };
 
 const upsertTask = (tasks: Task[], next: Task): Task[] => {
@@ -29,6 +30,7 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
         tasks: action.payload,
         loading: false,
         error: null,
+        initialized: true,
       };
     case 'ADD_TASK':
       return {
@@ -54,12 +56,20 @@ export const taskReducer = (state: TaskState, action: TaskAction): TaskState => 
       return {
         ...state,
         error: action.payload,
+        // Even on error, we've attempted a load; mark initialized so UI can show error/empty states appropriately
+        initialized: true,
+      };
+    case 'SET_INITIALIZED':
+      return {
+        ...state,
+        initialized: action.payload,
       };
     case 'RESET':
       return {
         tasks: [],
         loading: false,
         error: null,
+        initialized: false,
       };
     default: {
       const exhaustiveCheck: never = action;
