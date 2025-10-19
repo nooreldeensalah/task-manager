@@ -169,6 +169,9 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body,
     padding: 0,
     minHeight: 20,
+    outlineWidth: 0,
+    outlineColor: 'transparent',
+    boxShadow: 'none',
   },
   clearButton: {
     marginLeft: SPACING.xs,
