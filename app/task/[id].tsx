@@ -1,12 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Platform, StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AuthGate from '@/components/auth/AuthGate';
 import EmptyState from '@/components/common/EmptyState';
-import FloatingActionButton from '@/components/common/FloatingActionButton';
 import LoadingIndicator from '@/components/common/LoadingIndicator';
 import ResponsiveContainer from '@/components/common/ResponsiveContainer';
 import TaskDetailCard from '@/components/task/TaskDetailCard';
@@ -165,10 +163,6 @@ function TaskDetailContent() {
 
   const headerTitle = task ? task.title : 'Task not found';
 
-  const handleGoBack = useCallback(() => {
-    router.back();
-  }, [router]);
-
   return (
     <>
       <Stack.Screen
@@ -179,7 +173,7 @@ function TaskDetailContent() {
           headerTitleStyle: { color: palette.text },
         }}
       />
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]} edges={['bottom']}>
         <ResponsiveContainer outerStyle={styles.mainOuter} style={styles.mainContent}>
           {!task && loading ? (
             <LoadingIndicator fullScreen />
@@ -214,15 +208,6 @@ function TaskDetailContent() {
               updatingStatus={updatingStatus}
             />
           ) : null}
-          {Platform.OS === 'web' ? (
-            <View style={styles.fabContainerAbsolute} pointerEvents="box-none">
-              <FloatingActionButton
-                onPress={handleGoBack}
-                icon={<Ionicons name="arrow-back" size={24} color={palette.background} />}
-                accessibilityLabel="Go back to task list"
-              />
-            </View>
-          ) : null}
         </ResponsiveContainer>
       </SafeAreaView>
     </>
@@ -252,15 +237,6 @@ export default function TaskDetailScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-  },
-  fabContainerAbsolute: {
-    position: 'absolute',
-    bottom: 6,
-    right: 0,
-    left: 0,
-    alignItems: 'flex-end',
-    zIndex: 10,
-    pointerEvents: 'box-none',
   },
   mainOuter: {
     flex: 1,

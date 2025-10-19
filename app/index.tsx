@@ -30,8 +30,8 @@ import type { TaskId } from '@/types/task';
 
 function TaskListContent() {
   const router = useRouter();
-  const { signOut: signOutUser, user } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
+  const { theme } = useTheme();
   const palette = Colors[theme];
   const {
     tasks,
@@ -124,14 +124,6 @@ function TaskListContent() {
     router.push(`/task/${taskId}`);
   }, [router]);
 
-  const handleSignOut = useCallback(async () => {
-    try {
-      await signOutUser();
-    } catch (signOutError) {
-      console.error('Failed to sign out:', signOutError);
-    }
-  }, [signOutUser]);
-
   const emptyState = useMemo(
     () => (
       <EmptyState
@@ -198,53 +190,8 @@ function TaskListContent() {
   }, [emptyState, searchQuery, statusFilter, tasks.length]);
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]} edges={['bottom']}>
       <ResponsiveContainer outerStyle={styles.mainOuter} style={styles.mainContent}>
-        <View style={styles.header}>
-          <View style={styles.headerText}>
-            <Text style={[styles.title, { color: palette.text }]}>Tasks</Text>
-            {user?.email ? (
-              <Text style={[styles.subtitle, { color: palette.textMuted }]} numberOfLines={1}>
-                {user.email}
-              </Text>
-            ) : null}
-          </View>
-          <View style={styles.headerActions}>
-            <Pressable
-              onPress={toggleTheme}
-              accessibilityRole="button"
-              accessibilityLabel={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.headerAction,
-                {
-                  opacity: pressed ? 0.6 : 1,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name={theme === 'dark' ? 'white-balance-sunny' : 'weather-night'}
-                size={24}
-                color={palette.text}
-              />
-            </Pressable>
-            <Pressable
-              onPress={handleSignOut}
-              accessibilityRole="button"
-              accessibilityLabel="Sign out"
-              hitSlop={8}
-              style={({ pressed }) => [
-                styles.headerAction,
-                {
-                  opacity: pressed ? 0.6 : 1,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons name="logout" size={24} color={palette.text} />
-            </Pressable>
-          </View>
-        </View>
-
         <TaskFilterBar
           filter={statusFilter}
           counts={statusCounts}
@@ -371,34 +318,6 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
     gap: 20,
-  },
-  header: {
-    paddingVertical: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 12,
-  },
-  headerText: {
-    flexShrink: 1,
-    gap: 4,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerAction: {
-    padding: 8,
-    borderRadius: 8,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  subtitle: {
-    fontSize: 12,
-    fontWeight: '500',
   },
   errorBanner: {
     borderWidth: 1,
