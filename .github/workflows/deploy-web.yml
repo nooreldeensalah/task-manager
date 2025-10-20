@@ -1,4 +1,4 @@
-name: Deploy Expo web to GitHub Pages
+name: Deploy Web Export to GitHub Pages
 
 on:
   push:
