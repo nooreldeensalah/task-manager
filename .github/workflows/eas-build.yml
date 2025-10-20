@@ -35,14 +35,3 @@ jobs:
 
       - name: Run ${{ matrix.platform }} preview build
         run: eas build --platform ${{ matrix.platform }} --profile preview --non-interactive --wait
-
-      - name: Download latest ${{ matrix.platform }} build artifact
-        run: |
-          mkdir -p build/${{ matrix.platform }}
-          eas build:download --platform ${{ matrix.platform }} --profile preview --latest --output build/${{ matrix.platform }}
-
-      - name: Upload ${{ matrix.platform }} build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: eas-${{ matrix.platform }}-preview
-          path: build/${{ matrix.platform }}
