@@ -12,6 +12,19 @@ import { useTheme } from '@/hooks/useTheme';
 
 type AuthMode = 'signin' | 'signup';
 
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  'auth/invalid-email': 'That email address looks incorrect. Please check and try again.',
+  'auth/user-not-found': "We couldn't find an account with that email.",
+  'auth/wrong-password': 'The password you entered is incorrect.',
+  'auth/email-already-in-use': 'That email is already associated with an account.',
+  'auth/weak-password': 'Passwords need to be at least 6 characters long.',
+  'auth/invalid-credential': 'Double-check your email and password, then try again.',
+  'auth/invalid-login-credentials': 'Double-check your email and password, then try again.',
+  'auth/network-request-failed': 'We could not reach the server. Check your connection and try again.',
+  'auth/too-many-requests': 'Too many attempts in a short time. Wait a moment and try again.',
+  'auth/user-disabled': 'This account has been disabled. Contact support if this seems unexpected.',
+};
+
 const mapAuthError = (error: unknown): string => {
   const fallback = 'Unable to authenticate. Please try again.';
 
@@ -19,22 +32,14 @@ const mapAuthError = (error: unknown): string => {
     return fallback;
   }
 
-  const firebaseError = error as FirebaseError;
+  const firebaseError = error as Partial<FirebaseError>;
+  const code = typeof firebaseError.code === 'string' ? firebaseError.code : null;
 
-  switch (firebaseError.code) {
-    case 'auth/invalid-email':
-      return 'That email address looks incorrect. Please check and try again.';
-    case 'auth/user-not-found':
-      return "We couldn't find an account with that email.";
-    case 'auth/wrong-password':
-      return 'The password you entered is incorrect.';
-    case 'auth/email-already-in-use':
-      return 'That email is already associated with an account.';
-    case 'auth/weak-password':
-      return 'Passwords need to be at least 6 characters long.';
-    default:
-      return firebaseError.message || fallback;
+  if (!code) {
+    return fallback;
   }
+
+  return AUTH_ERROR_MESSAGES[code] ?? fallback;
 };
 
 const TITLE_COPY: Record<AuthMode, string> = {
