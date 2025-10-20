@@ -39,8 +39,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
-      "expo-notifications"
+      "expo-router"
     ],
     "experiments": {
       "baseUrl": "/c1-tm/",
