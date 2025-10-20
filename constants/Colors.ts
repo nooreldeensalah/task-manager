@@ -8,17 +8,12 @@ export interface ThemePalette {
   textMuted: string;
   border: string;
   success: string;
-  warning: string;
   danger: string;
-  tint: string;
-  tabIconDefault: string;
-  tabIconSelected: string;
 }
 
 const BASE_COLORS = {
-  primary: '#7c3aed', // Vibrant violet for brand-forward actions
+  primary: '#7c3aed',
   success: '#22c55e',
-  warning: '#facc15',
   danger: '#ef4444',
 } as const;
 
@@ -32,11 +27,7 @@ export const LIGHT_THEME_COLORS: ThemePalette = {
   textMuted: '#6b7280',
   border: '#d6d8eb',
   success: BASE_COLORS.success,
-  warning: BASE_COLORS.warning,
   danger: BASE_COLORS.danger,
-  tint: BASE_COLORS.primary,
-  tabIconDefault: '#9ca3af',
-  tabIconSelected: BASE_COLORS.primary,
 };
 
 export const DARK_THEME_COLORS: ThemePalette = {
@@ -49,11 +40,7 @@ export const DARK_THEME_COLORS: ThemePalette = {
   textMuted: '#9ca3af',
   border: '#30374a',
   success: BASE_COLORS.success,
-  warning: BASE_COLORS.warning,
   danger: BASE_COLORS.danger,
-  tint: BASE_COLORS.primary,
-  tabIconDefault: '#6b7280',
-  tabIconSelected: BASE_COLORS.primary,
 };
 
 export const THEME_COLORS: Record<'light' | 'dark', ThemePalette> = {

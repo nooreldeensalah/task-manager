@@ -335,9 +335,6 @@ const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
   },
-  fabContainer: {
-    alignItems: 'flex-end',
-  },
   fabContainerAbsolute: {
     position: 'absolute',
     bottom: 24,

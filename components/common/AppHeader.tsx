@@ -21,7 +21,6 @@ const AppHeader = ({ showBackButton = false }: AppHeaderProps) => {
   // Determine if we should show back button based on route
   const isDetailPage = (segments as string[]).includes('task') && segments.length > 1;
   const shouldShowBack = showBackButton || isDetailPage;
-  const title = isDetailPage ? 'Task Details' : 'Tasks';
 
   const handleGoBack = () => {
     if (router.canGoBack()) {
@@ -60,7 +59,7 @@ const AppHeader = ({ showBackButton = false }: AppHeaderProps) => {
             </Pressable>
           ) : null}
           <View style={styles.headerText}>
-            {!isDetailPage && <Text style={[styles.title, { color: palette.text }]}>{title}</Text>}
+            {!isDetailPage && <Text style={[styles.title, { color: palette.text }]}>Tasks</Text>}
             {user?.email && !shouldShowBack ? (
               <Text style={[styles.subtitle, { color: palette.textMuted }]} numberOfLines={1}>
                 {user.email}

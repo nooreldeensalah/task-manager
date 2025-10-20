@@ -68,12 +68,3 @@ export const getResponsivePadding = (width: number) => {
 
   return SPACING.md;
 };
-
-export const getContainerWidth = (width: number) => {
-  if (width >= BREAKPOINTS.desktop) {
-    return CONTAINER_MAX_WIDTH;
-  }
-
-  const horizontalPadding = getResponsivePadding(width) * 2;
-  return Math.max(width - horizontalPadding, 320);
-};

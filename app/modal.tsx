@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import Button from '@/components/common/Button';
@@ -33,7 +33,7 @@ export default function ModalScreen() {
           </View>
         </View>
       </ResponsiveContainer>
-      <StatusBar style={Platform.OS === 'ios' ? 'light' : theme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
     </SafeAreaView>
   );
 }

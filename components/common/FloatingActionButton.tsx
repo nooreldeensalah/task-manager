@@ -44,7 +44,6 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    // No elevation/shadows for a flatter look
     ...Platform.select({
       web: {
         cursor: 'pointer',

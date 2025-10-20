@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   topSection: {
     gap: SPACING.xs,
-    minHeight: 24, // match checkbox height to align top row
+    minHeight: 24,
   },
   title: {
     ...TYPOGRAPHY.subtitle,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: SPACING.sm,
-    minHeight: 28, // match delete button height to align bottom row
+    minHeight: 28,
   },
   due: {
     ...TYPOGRAPHY.caption,
