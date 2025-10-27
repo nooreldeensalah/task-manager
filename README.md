@@ -1,9 +1,9 @@
-# C1 Task Manager
+# Task Manager
 
 [![Deploy Web Export to GitHub Pages](https://github.com/nooreldeensalah/c1-task-manager/actions/workflows/deploy-web.yml/badge.svg)](https://github.com/nooreldeensalah/c1-task-manager/actions/workflows/deploy-web.yml)
 [![EAS Preview Builds](https://github.com/nooreldeensalah/c1-task-manager/actions/workflows/eas-build.yml/badge.svg)](https://github.com/nooreldeensalah/c1-task-manager/actions/workflows/eas-build.yml)
 
-C1 Task Manager is a polished, cross-platform task tracker built with Expo and React Native. It supports authenticated, user-scoped task management on iOS, Android, and the web, with a single-page web export that can be hosted on GitHub Pages. The codebase is TypeScript-first, Firebase-backed, and wired for automated Expo Application Services (EAS) releases.
+Task Manager is a polished, cross-platform task tracker built with Expo and React Native. It supports authenticated, user-scoped task management on iOS, Android, and the web, with a single-page web export that can be hosted on GitHub Pages. The codebase is TypeScript-first, Firebase-backed, and wired for automated Expo Application Services (EAS) releases.
 
 >[!NOTE]
 > This project follows a spec-driven development approach using [GitHub's Spec Kit](https://github.com/github/spec-kit) to define and guide its requirements and implementation.
